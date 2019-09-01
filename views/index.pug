@@ -1,0 +1,10 @@
+extends ../node_modules/pug-bootstrap/_bootstrap
+
+block body
+	+navbar("Dragonchain UVN Block Explorer","dropdown_menu","inverse")
+	div.container
+		h3 Public ID: #{status.response.id} 
+		h4 Node Level: #{status.response.level}
+
+		h5 Last Block
+		pre #{JSON.stringify(blocks.response.results[0], null, 2)}
