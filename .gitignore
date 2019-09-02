@@ -10,6 +10,7 @@ dist
 /coverage
 
 # misc
+.idea/
 .DS_Store
 variables.env
 npm-debug.log*
