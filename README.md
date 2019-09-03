@@ -6,7 +6,9 @@ Stub:
 
 1. Install nodejs
   - On Windows
+    - https://nodejs.org/en/download/
   - On Linux
+    ```sudo apt-get install npm```
   
 2. Create your credentials file
   - On Windows:
