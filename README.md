@@ -11,11 +11,10 @@ Stub:
 2. Create your credentials file
   - On Windows:
     1. Go to %LOCALAPPDATA%
-    2. Create a dragonchain folder
+    2. Create a ```dragonchain``` folder
     3. Create a file named ```credentials```    
   - On Linux:
-    1. mkdir ~/.dragonchain
-    2. Create a file named ```credentials```
+    1. ```mkdir ~/.dragonchain && nano ~/.dragonchain/credentials```    
 3. In the credentials file, paste the following:
   ```
   [default]
