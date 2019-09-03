@@ -40,7 +40,8 @@ Stub:
 
 Press CTRL+C in the Git Bash or Command Prompt window to end the server process.
 
-**Note for Windows NodeJS users**
+## Note for Windows NodeJS users
+
 The processes started by running our server can end up hanging. You can force Windows to kill the process with the following command:
 
 ```taskkill /IM node.exe /F``` in a Windows command prompt or
