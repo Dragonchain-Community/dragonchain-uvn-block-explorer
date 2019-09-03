@@ -36,8 +36,8 @@ const main = async() => {
 			status: poll_response.status,
 
 			last_block: poll_response.last_block,
-			last_block_time: moment(poll_response.last_block.header.timestamp * 1000).format('llll'),
-			last_block_time_since: moment(poll_response.last_block.header.timestamp * 1000).fromNow(),
+			last_block_time: moment.utc(poll_response.last_block.header.timestamp * 1000).format('llll'),
+			last_block_time_since: moment.utc(poll_response.last_block.header.timestamp * 1000).fromNow(),
 			last_block_drgn_time: poll_response.last_block.header.current_ddss,
 
 			block_height: poll_response.last_block.header.block_id,
