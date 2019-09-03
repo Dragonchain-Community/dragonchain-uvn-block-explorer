@@ -46,4 +46,4 @@ The processes started by running our server can end up hanging. You can force Wi
 
 ```taskkill /IM node.exe /F``` in a Windows command prompt or
 
-```taskkill -IM node.ex -F``` in Git Bash
+```taskkill -IM node.exe -F``` in Git Bash
