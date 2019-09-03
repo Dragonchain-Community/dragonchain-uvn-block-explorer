@@ -16,6 +16,7 @@ Stub:
     1. Go to %LOCALAPPDATA% in File Explorer
     2. Create a ```dragonchain``` folder
     3. Create a file named ```credentials```    
+      - Go to the View tab, then make sure "File name extensions" is **checked** to be sure you can create the credentials file without an extension like ".txt"
   - On Linux:
     1. ```mkdir ~/.dragonchain && nano ~/.dragonchain/credentials```    
 3. In the credentials file, paste the following:
