@@ -2,7 +2,7 @@
 
 Stub:
 
-**Note: do not install on same server as your dragonchain verification node**
+### Note: do not install on same server as your dragonchain verification node
 
 1. Install nodejs
   - On Windows
