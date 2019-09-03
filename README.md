@@ -13,7 +13,7 @@ Stub:
   
 2. Create your credentials file
   - On Windows:
-    1. Go to %LOCALAPPDATA%
+    1. Go to %LOCALAPPDATA% in File Explorer
     2. Create a ```dragonchain``` folder
     3. Create a file named ```credentials```    
   - On Linux:
