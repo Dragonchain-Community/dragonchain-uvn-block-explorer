@@ -50,6 +50,8 @@ const main = async() => {
 	}));
 
     app.use(function (err, req, res, next) {
+        console.log(err);
+
         res.render('error', {
             title: "Error - Dragonchain UVN Block Explorer",
             error: err

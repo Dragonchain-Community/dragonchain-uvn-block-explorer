@@ -17,6 +17,8 @@ module.exports  = {
             throw {errno: response.status, type: `API Error: ${response.response.error.type}`, message: `API Error Details: ${response.response.error.details}`}
         }
 
+        return response;
+
     },
     poll: async function (client) {
 
