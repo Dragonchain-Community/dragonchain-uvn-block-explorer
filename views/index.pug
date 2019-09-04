@@ -5,40 +5,40 @@ block body
 
 	+navbar("Dragonchain UVN Block Explorer","dropdown_menu","inverse")
 	div.container
-		h2 Chain ID: #{chain_id} 
+		h2 Chain ID: #{chain_id}
 		div.well
 			div.row
 				div.col-sm-4
 					p
 						b Node Level:
-						br 
+						br
 						span #{chain_level}
 				div.col-sm-4
 					p
-						b Dragonchain Version: 
+						b Dragonchain Version:
 						br
 						span #{chain_version}
 				div.col-sm-4
 					p
-						b Block Height: 
+						b Block Height:
 						br
-						span #{block_height}	
+						span #{block_height}
 
 			div.row
 				div.col-sm-4
 					p
-						b Blocks Last 24 Hours: 
+						b Blocks Last 24 Hours:
 						br
-						span #{blocks_last_24_hours}	
+						span #{blocks_last_24_hours}
 
 				div.col-sm-4
 					p
-						b Last Block Time: 
+						b Last Block Time:
 						br
 						span #{last_block_time} UTC (#{last_block_time_since})
 				div.col-sm-4
 					p
-						b TIME @ Last Block: 
+						b TIME @ Last Block:
 						br
 						span #{last_block_drgn_time}
 
@@ -55,15 +55,15 @@ block body
 				b Last Block:
 				pre !{JSON.stringify(last_block, null, 2)}
 
-	
+
 	script.
 		var blocksByHour = !{JSON.stringify(blocks_by_hour)};
-		var blocksByDay = !{JSON.stringify(blocks_by_day)};	
-					
-	
+		var blocksByDay = !{JSON.stringify(blocks_by_day)};
+
+
 		google.charts.load('current', {packages: ['corechart', 'bar']});
 		google.charts.setOnLoadCallback(drawCharts);
-		
+
 		function drawCharts() {
 			drawChartDay();
 			drawChartWeek();

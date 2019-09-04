@@ -1,0 +1,9 @@
+extends ../node_modules/pug-bootstrap/_bootstrap
+block body
+    +navbar("Dragonchain UVN Block Explorer","dropdown_menu","inverse")
+    div.container
+        h2 Error Occurred
+        div.row
+            div.col-sm-12
+                h4 #{error.errno} - #{error.type}
+                p #{error.message}

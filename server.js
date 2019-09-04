@@ -23,7 +23,8 @@ const main = async() => {
 	app.set('view engine', 'pug');
 
 	app.get('/', awaitHandlerFactory(async (req, res) => {
-		const poll_response = await tools.poll(client);
+
+        const poll_response = await tools.poll(client);
 
 		const blocksByHour = tools.parseBlocksByHour(poll_response.blocks_day);
 
@@ -47,6 +48,15 @@ const main = async() => {
 			blocks_last_24_hours: poll_response.blocks_day.length
 		});
 	}));
+
+    app.use(function (err, req, res, next) {
+        res.render('error', {
+            title: "Error - Dragonchain UVN Block Explorer",
+            error: err
+        });
+    });
+
+
 
 
 	// In production use port 80 or, if SSL available, use port 443 //
