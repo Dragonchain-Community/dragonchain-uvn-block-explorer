@@ -27,7 +27,7 @@ Stub:
   [YOUR PUBLIC ID]
   auth_key_id = YOUR HMAC_ID
   auth_key = YOUR HMAC_KEY
-  endpoint = YOUR DRAGONCHAIN_ENDPOINT
+  endpoint = YOUR DRAGONCHAIN_ENDPOINT WITH PORT NUMBER (example: http://12.34.56.78:30000)
   ```
   
   - Replace the CAPITAL fields with your information
