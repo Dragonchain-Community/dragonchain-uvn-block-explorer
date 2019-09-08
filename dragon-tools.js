@@ -1,30 +1,13 @@
 const moment = require('moment');
 const _ = require('underscore');
 const util = require('util');
+const rp = require('request-promise');
 
-module.exports  = {
-    validateResponse: function (response) {
-
-        if (typeof response == "undefined")
-        {
-            console.log(response);
-            throw {errno: "Undefined Object", type: "Invalid Response", message: "The response object passed was undefined."};
-        }
-
-        if (typeof response.response.error != "undefined")
-        {
-            console.log(response);
-            throw {errno: response.status, type: `API Error: ${response.response.error.type}`, message: `API Error Details: ${response.response.error.details}`}
-        }
-
-        return response;
-
-    },
+module.exports  = {    
     poll: async function (client) {
 
         const status_response = this.validateResponse(await client.getStatus());
         const last_block_response = this.validateResponse(await client.queryBlocks({ limit: 1, sort: "block_id:desc"}));
-
 
         let blocks_day = [];
         let done = false;
@@ -39,8 +22,8 @@ module.exports  = {
             {
                 for (let i = 0; i < blocks_response.response.results.length; i++)
                 {
-                        element = blocks_response.response.results[i];
-                        blocks_day.push(element);
+                    element = blocks_response.response.results[i];
+                    blocks_day.push(element);
                 }
 
                 page += 50;
@@ -62,10 +45,35 @@ module.exports  = {
 
         }
 
-        return {status: status_response.response, last_block: last_block_response.response.results[0], blocks_day: blocks_day, blocks_week: blocks_week};
+        let takara_price = await this.fetchTakaraPrice();
+        
+        return {status: status_response.response, last_block: last_block_response.response.results[0], blocks_day: blocks_day, blocks_week: blocks_week, takara_price: takara_price};
     },
+    fetchTakaraPrice: async function () {
+            let price = await rp({uri: "https://billing.api.dragonchain.com/v1/prices/dragonPrice", json: true})
+                                .then(function (res) {
+                                    return res.price;
+                                })
 
+            return price;
+    },
+    validateResponse: function (response) {
 
+        if (typeof response == "undefined")
+        {
+            console.log(response);
+            throw {errno: "Undefined Object", type: "Invalid Response", message: "The response object passed was undefined."};
+        }
+
+        if (typeof response.response.error != "undefined")
+        {
+            console.log(response);
+            throw {errno: response.status, type: `API Error: ${response.response.error.type}`, message: `API Error Details: ${response.response.error.details}`}
+        }
+
+        return response;
+
+    },
     parseBlocksByHour: function (blocks) {
         const occurences = [];
 
