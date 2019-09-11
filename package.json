@@ -3,9 +3,11 @@
   "version": "0.0.1",
   "main": "server.js",
   "dependencies": {
+    "crypto-js": "^3.1.9-1",
     "dragonchain-sdk": "^3.2.0",
     "express": "^4.17.1",
     "express-handlebars": "^3.1.0",
+    "jquery": "^3.4.1",
     "moment": "^2.24.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
@@ -19,5 +21,9 @@
   },
   "author": "John DeLancey",
   "license": "MIT",
-  "homepage": "https://github.com/Dragonchain-Community/dragonchain-uvn-block-explorer#readme"
+  "homepage": "https://github.com/Dragonchain-Community/dragonchain-uvn-block-explorer#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dragonchain-Community/dragonchain-uvn-block-explorer.git"
+  }
 }

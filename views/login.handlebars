@@ -1,0 +1,52 @@
+<h2>Block Explorer Login</h2>
+<p>
+	Enter your node credentials and a secure password below to log in.
+</p>
+<form id="frm_login">	
+	<p>
+		<label for="public_id">Public ID (NOT Chain ID)</label>
+		<input id="public_id" name="public_id" type="text" class="form-control">
+	</p>	
+	<p>
+		<label for="access_id">Access ID (aka "HMAC ID")</label>
+		<input id="access_id" name="access_id" type="text" class="form-control">
+	</p>
+	<p>
+		<label for="access_key">Access Key (aka "HMAC Key")</label>
+		<input id="access_key" name="access_key" type="text" class="form-control">
+	</p>
+	<p>
+		<label for="endpoint_url">Full Endpoint URL <b>INCLUDING</b> port (example: http://12.34.56.78:30000)</label>
+		<input id="endpoint_url" name="endpoint_url" type="text" class="form-control">
+	</p>
+	<p>
+		<label for="password">Secure Password</label>		
+		<input id="password" name="password" type="password" class="form-control">
+	</p>
+	<p>
+		<button type="submit" class="btn btn-primary">Log In</button>
+	</p>
+</form>
+
+<script type="text/javascript" src="/bower_components/crypto-js/crypto-js.js"></script>
+<script type="text/javascript">
+	$(function () {
+		$("#frm_login").submit(function (e) {
+			e.preventDefault();
+
+			var credentialsObj = {
+				"public_id": $("#public_id").val(),
+				"access_id": $("#access_id").val(),
+				"access_key": $("#access_key").val(),
+				"endpoint_url": $("#endpoint_url").val()
+			}
+
+			window.sessionStorage.credentials = JSON.stringify(credentialsObj);
+
+			window.localStorage.credentials_secure = CryptoJS.AES.encrypt(JSON.stringify(credentialsObj), $("#password").val());
+
+			document.location.href="/";
+		});
+	})
+    
+</script> 

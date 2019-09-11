@@ -1,0 +1,47 @@
+<h2>Block Explorer Login Verification</h2>
+<p>
+	Enter your login password to verify access.	
+</p>
+<div id="messages"></div>
+<form id="frm_login">		
+	<p>
+		<label for="password">Secure Password</label>		
+		<input id="password" name="password" type="password" class="form-control">
+	</p>
+	<p>
+		<button type="submit" class="btn btn-primary">Log In</button>
+		<button id="forgot" class="btn btn-info">Forgot your password? Click here to reset your login info.</button>
+	</p>
+</form>
+
+<script type="text/javascript" src="/bower_components/crypto-js/crypto-js.js"></script>
+<script type="text/javascript">
+	$(function () {
+
+		$("#forgot").click(function () {
+			window.localStorage.removeItem("credentials_secure")
+			window.sessionStorage.removeItem("credentials");
+			document.location.href = "/login";
+		})
+
+		$("#frm_login").submit(function (e) {
+			e.preventDefault();
+
+			try 
+			{
+				window.sessionStorage.credentials = CryptoJS.AES.decrypt(window.localStorage.credentials_secure, $("#password").val()).toString(CryptoJS.enc.Utf8)
+
+				if (window.sessionStorage.credentials)
+					document.location.href = "/";
+				
+			} catch (e)
+			{
+				$("#messages").html(
+					$("<div>").addClass("alert alert-danger").html("Invalid password. Please try again.")
+				)
+			}			
+
+		});
+	})
+    
+</script> 

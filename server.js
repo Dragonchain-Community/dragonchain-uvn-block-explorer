@@ -8,7 +8,6 @@ const exphbs = require('express-handlebars');
 
 const app = express();
 
-
 const main = async() => {
 	const awaitHandlerFactory = (middleware) => {
 		return async (req, res, next) => {
@@ -30,35 +29,65 @@ const main = async() => {
 	app.engine('handlebars', hbs.engine);
 	app.set('view engine', 'handlebars');
 
+	app.use(express.urlencoded({ extended: true }))
+	app.use('/bower_components',  express.static(__dirname + '/bower_components'));
+	app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
+
 	app.get('/', awaitHandlerFactory(async (req, res) => {
+		res.render('index', {title: "Dragonchain UVN Block Explorer"});
+	}));
 
-		const client = await dcsdk.createClient();
+	app.get('/login', awaitHandlerFactory(async (req, res) => {
+		res.render('login', {title: "Dragonchain UVN Block Explorer Login"});
+	}));
 
-        const poll_response = await tools.poll(client);
+	app.get('/verify', awaitHandlerFactory(async (req, res) => {
+		res.render('verify', {title: "Dragonchain UVN Block Explorer Login Verification"});
+	}));
 
-		const blocksByHour = tools.parseBlocksByHour(poll_response.blocks_day);
+	app.get('/noblocks', awaitHandlerFactory(async (req, res) => {
+		res.render('empty-node', {title: "Dragonchain UVN Block Explorer", layout: false});
+	}));	
 
-		res.render('index', {
-			title: "Dragonchain UVN Block Explorer",
-			chain_id: poll_response.status.id,
-			chain_level: poll_response.status.level,
-			chain_version: poll_response.status.version,
+	app.post('/get-node-info', awaitHandlerFactory(async (req, res) => {
 
-			status: poll_response.status,
+		const public_id = req.body.public_id;
+		const access_id = req.body.access_id;
+		const access_key = req.body.access_key;
+		const endpoint_url = req.body.endpoint_url;
 
-			last_block: poll_response.last_block,
-			last_block_time: moment.utc(poll_response.last_block.header.timestamp * 1000).format('lll'),
-			last_block_time_since: moment.utc(poll_response.last_block.header.timestamp * 1000).fromNow(),
-			last_block_drgn_time: poll_response.last_block.header.current_ddss,
+		const client = await dcsdk.createClient({authKeyId: access_id, authKey: access_key, dragonchainId: public_id, endpoint: endpoint_url});
+		
+    	const poll_response = await tools.poll(client);
+        
+		if (poll_response.empty)        
+		{
+    		res.redirect("/noblocks");
+    	} else {
+			const blocksByHour = tools.parseBlocksByHour(poll_response.blocks_day);
 
-			block_height: poll_response.last_block.header.block_id,
-			blocks: poll_response.blocks_day,
-			blocks_by_hour: blocksByHour,
-			blocks_by_day: poll_response.blocks_week,
-			blocks_last_24_hours: poll_response.blocks_day.length,
+			res.render('node-info', {
+				layout: false,			
+				chain_id: poll_response.status.id,
+				chain_level: poll_response.status.level,
+				chain_version: poll_response.status.version,
 
-			takara_price: poll_response.takara_price
-		});
+				status: poll_response.status,
+
+				last_block: poll_response.last_block,
+				last_block_time: moment.utc(poll_response.last_block.header.timestamp * 1000).format('lll'),
+				last_block_time_since: moment.utc(poll_response.last_block.header.timestamp * 1000).fromNow(),
+				last_block_drgn_time: poll_response.last_block.header.current_ddss,
+
+				block_height: poll_response.last_block.header.block_id,
+				blocks: poll_response.blocks_day,
+				blocks_by_hour: blocksByHour,
+				blocks_by_day: poll_response.blocks_week,
+				blocks_last_24_hours: poll_response.blocks_day.length,
+
+				takara_price: poll_response.takara_price
+			});
+		}
 	}));
 
     app.use(function (err, req, res, next) {
