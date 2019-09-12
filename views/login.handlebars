@@ -18,17 +18,12 @@
 	<p>
 		<label for="endpoint_url">Full Endpoint URL <b>INCLUDING</b> port (example: http://12.34.56.78:30000)</label>
 		<input id="endpoint_url" name="endpoint_url" type="text" class="form-control">
-	</p>
-	<p>
-		<label for="password">Secure Password</label>		
-		<input id="password" name="password" type="password" class="form-control">
-	</p>
+	</p>	
 	<p>
 		<button type="submit" class="btn btn-primary">Log In</button>
 	</p>
 </form>
 
-<script type="text/javascript" src="/bower_components/crypto-js/crypto-js.js"></script>
 <script type="text/javascript">
 	$(function () {
 		$("#frm_login").submit(function (e) {
@@ -41,11 +36,18 @@
 				"endpoint_url": $("#endpoint_url").val()
 			}
 
-			window.sessionStorage.credentials = JSON.stringify(credentialsObj);
-
-			window.localStorage.credentials_secure = CryptoJS.AES.encrypt(JSON.stringify(credentialsObj), $("#password").val());
-
-			document.location.href="/";
+			$.ajax({
+				url: "/login",
+				method: "POST",
+				data: {
+					credentials_string: JSON.stringify(credentialsObj)
+				},				
+				dataType: "html"
+			})			
+				.done(function (data) {
+					window.localStorage.credentials_secure = data;		
+					document.location.href="/";
+				})
 		});
 	})
     

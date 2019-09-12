@@ -9,8 +9,6 @@ module.exports  = {
         const status_response = this.validateResponse(await client.getStatus());
         const last_block_response = this.validateResponse(await client.queryBlocks({ limit: 1, sort: "block_id:desc"}));
 
-        console.log(util.inspect(last_block_response, false, null, true))
-
         if (last_block_response.response.total == 0)
         {
             return {empty: true}

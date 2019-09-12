@@ -5,6 +5,8 @@ const dcsdk = require('dragonchain-sdk')
 const _ = require('underscore');
 const express = require('express');
 const exphbs = require('express-handlebars');
+const config = require('./config.json');
+const CryptoJS = require('crypto-js');
 
 const app = express();
 
@@ -30,15 +32,24 @@ const main = async() => {
 	app.set('view engine', 'handlebars');
 
 	app.use(express.urlencoded({ extended: true }))
-	app.use('/bower_components',  express.static(__dirname + '/bower_components'));
+	app.use('/public',  express.static(__dirname + '/public'));	
 	app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
+
+	app.get('/experiment', awaitHandlerFactory(async (req, res) => {
+		res.render('experiment', {title: "Dragonchain UVN Block Explorer Login"});
+	}));
+
 
 	app.get('/', awaitHandlerFactory(async (req, res) => {
 		res.render('index', {title: "Dragonchain UVN Block Explorer"});
 	}));
 
 	app.get('/login', awaitHandlerFactory(async (req, res) => {
-		res.render('login', {title: "Dragonchain UVN Block Explorer Login"});
+		res.render('login', {title: "Dragonchain UVN Block Explorer Login", layout:false});
+	}));
+
+	app.post('/login', awaitHandlerFactory(async (req, res) => {					
+		res.send(CryptoJS.AES.encrypt(req.body.credentials_string, config.salt).toString());
 	}));
 
 	app.get('/verify', awaitHandlerFactory(async (req, res) => {
@@ -51,12 +62,19 @@ const main = async() => {
 
 	app.post('/get-node-info', awaitHandlerFactory(async (req, res) => {
 
-		const public_id = req.body.public_id;
-		const access_id = req.body.access_id;
-		const access_key = req.body.access_key;
-		const endpoint_url = req.body.endpoint_url;
+		let credentials = null;
 
-		const client = await dcsdk.createClient({authKeyId: access_id, authKey: access_key, dragonchainId: public_id, endpoint: endpoint_url});
+		try {
+			const credentials_string = CryptoJS.AES.decrypt(req.body.credentials_secure, config.salt).toString(CryptoJS.enc.Utf8);
+
+			credentials = JSON.parse(credentials_string);
+		} catch (e)
+		{
+			res.redirect("/login");
+			return;
+		}
+
+		const client = await dcsdk.createClient({authKeyId: credentials.access_id, authKey: credentials.access_key, dragonchainId: credentials.public_id, endpoint: credentials.endpoint_url});
 		
     	const poll_response = await tools.poll(client);
         

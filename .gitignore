@@ -20,4 +20,4 @@ yarn-error.log*
 .albertignore
 *.map
 firebase-adminsdk.json
-
+config.json

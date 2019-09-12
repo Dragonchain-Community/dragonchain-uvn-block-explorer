@@ -7,18 +7,13 @@
 <script type="text/javascript">
 	$(function () {
 		// Check for existing credentials in 1) sessionstorage, 2) (encrypted) in localstorage
-
-		if (window.sessionStorage.credentials)
+		if (window.localStorage.credentials_secure)
 		{
-			var credentials = JSON.parse(window.sessionStorage.credentials);
 			$.ajax({
 				url: "/get-node-info",
 				method: "POST",
 				data: {
-					public_id: credentials.public_id,
-					access_id: credentials.access_id,
-					access_key: credentials.access_key,
-					endpoint_url: credentials.endpoint_url
+					credentials_secure: window.localStorage.credentials_secure
 				},				
 				dataType: "html"
 			})			
@@ -27,20 +22,13 @@
 					$("#logout")
 						.removeClass("d-none")
 						.click(function () {
-							window.localStorage.removeItem("credentials_secure")
-							window.sessionStorage.removeItem("credentials");
-							document.location.href = "/login";
+							window.localStorage.removeItem("credentials_secure")							
+							document.location.href = "/";
 						})
-				})
-			
-		} else if (window.localStorage.credentials_secure)
-		{
-			// Redirect to verify //
-			document.location.href = "/verify";
+				})			
 
 		} else {
-			// Redirect to login //
-			document.location.href = "/login";
+			$.get("/login").done(function (data) {$("#node-info").html(data)});
 		}
 
 	});	
