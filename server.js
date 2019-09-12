@@ -35,11 +35,6 @@ const main = async() => {
 	app.use('/public',  express.static(__dirname + '/public'));	
 	app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
 
-	app.get('/experiment', awaitHandlerFactory(async (req, res) => {
-		res.render('experiment', {title: "Dragonchain UVN Block Explorer Login"});
-	}));
-
-
 	app.get('/', awaitHandlerFactory(async (req, res) => {
 		res.render('index', {title: "Dragonchain UVN Block Explorer"});
 	}));
@@ -51,11 +46,7 @@ const main = async() => {
 	app.post('/login', awaitHandlerFactory(async (req, res) => {					
 		res.send(CryptoJS.AES.encrypt(req.body.credentials_string, config.salt).toString());
 	}));
-
-	app.get('/verify', awaitHandlerFactory(async (req, res) => {
-		res.render('verify', {title: "Dragonchain UVN Block Explorer Login Verification"});
-	}));
-
+	
 	app.get('/noblocks', awaitHandlerFactory(async (req, res) => {
 		res.render('empty-node', {title: "Dragonchain UVN Block Explorer", layout: false});
 	}));	

@@ -5,8 +5,7 @@
 
 <script type='text/javascript' src='https://www.gstatic.com/charts/loader.js'></script>
 <script type="text/javascript">
-	$(function () {
-		// Check for existing credentials in 1) sessionstorage, 2) (encrypted) in localstorage
+	$(function () {		
 		if (window.localStorage.credentials_secure)
 		{
 			$.ajax({
