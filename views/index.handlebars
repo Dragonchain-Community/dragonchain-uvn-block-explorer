@@ -163,7 +163,7 @@
 				})
 
 		} else {
-			$.get("/login").done(function (data) {$("#node-info").html(data).removeClass("d-none")});
+			document.location.href = "/login";
 		}
 
 	});	

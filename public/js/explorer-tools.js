@@ -128,12 +128,12 @@ var tools = {
 
 		if (config.current_chart == "#chart-byweek")
 		{
-			var start_timestamp = moment.utc().subtract(23, "weeks").startOf("week").format("X");
+			var start_timestamp = moment.utc().subtract(11, "weeks").startOf("week").format("X");
 			
 			db.findBlocksByTimestamp({"$gte": Number(start_timestamp)})
 				.then(function (result) {
 					if (result.docs && result.docs.length > 0)
-						tools.drawBlocksPerWeek(tools.parseBlocksByWeek(result.docs), "24 Weeks")
+						tools.drawBlocksPerWeek(tools.parseBlocksByWeek(result.docs), "12 Weeks")
 				})		
 
 		} else if (config.current_chart == "#chart-byday")
