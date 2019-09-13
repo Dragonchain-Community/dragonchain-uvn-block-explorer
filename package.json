@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "main": "server.js",
   "dependencies": {
+    "chart.js": "^2.8.0",
     "crypto-js": "^3.1.9-1",
     "dragonchain-sdk": "^3.2.0",
     "express": "^4.17.1",
@@ -10,6 +11,7 @@
     "fs": "0.0.1-security",
     "jquery": "^3.4.1",
     "moment": "^2.24.0",
+    "pouchdb": "^7.1.1",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "underscore": "^1.9.1",

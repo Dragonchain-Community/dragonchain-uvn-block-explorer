@@ -1,4 +1,4 @@
-const tools = require('./dragon-tools')
+const dct = require('./dragon-tools')
 const moment = require('moment')
 const util = require('util');
 const dcsdk = require('dragonchain-sdk')
@@ -32,15 +32,19 @@ const main = async() => {
 	app.set('view engine', 'handlebars');
 
 	app.use(express.urlencoded({ extended: true }))
-	app.use('/public',  express.static(__dirname + '/public'));	
+	app.use('/public',  express.static(__dirname + '/public'));		
 	app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
+	app.use('/moment', express.static(__dirname + '/node_modules/moment/'));
+	app.use('/underscore', express.static(__dirname + '/node_modules/underscore/'));
+	app.use('/pouchdb', express.static(__dirname + '/node_modules/pouchdb/dist/'));
+	app.use('/chartjs', express.static(__dirname + '/node_modules/chart.js/dist/'));
 
 	app.get('/', awaitHandlerFactory(async (req, res) => {
 		res.render('index', {title: "Dragonchain UVN Block Explorer"});
 	}));
 
 	app.get('/login', awaitHandlerFactory(async (req, res) => {
-		res.render('login', {title: "Dragonchain UVN Block Explorer Login", layout:false});
+		res.render('login', {title: "Dragonchain UVN Block Explorer Login"});
 	}));
 
 	app.post('/login', awaitHandlerFactory(async (req, res) => {					
@@ -51,23 +55,46 @@ const main = async() => {
 		res.render('empty-node', {title: "Dragonchain UVN Block Explorer", layout: false});
 	}));	
 
+	app.post('/get-status', awaitHandlerFactory(async (req, res) => {
+
+		try {			
+			const client = await dct.createClient(req.body.credentials_secure, config.salt);	
+
+			const status = await dct.getStatus(client);
+
+			res.send(JSON.stringify(status));		
+		} catch (e) {
+			console.log(e);
+			res.send(JSON.stringify({"error":"login"}));
+            return;
+		}
+	}));
+
+	app.post('/get-blocks', awaitHandlerFactory(async (req, res) => {
+
+		try {			
+			const client = await dct.createClient(req.body.credentials_secure, config.salt);	
+
+			const blocks = await dct.getBlocks(client, req.body.start_block_id);
+
+			res.send(JSON.stringify(blocks));		
+		} catch (e) {
+			console.log(e);
+			res.send(JSON.stringify({"error":"login"}));
+            return;
+		}
+	}));
+
 	app.post('/get-node-info', awaitHandlerFactory(async (req, res) => {
 
-		let credentials = null;
-
 		try {
-			const credentials_string = CryptoJS.AES.decrypt(req.body.credentials_secure, config.salt).toString(CryptoJS.enc.Utf8);
-
-			credentials = JSON.parse(credentials_string);
-		} catch (e)
-		{
+			const client = dct.createClient(req.body.credentials_secure, config.salt);
+		} catch (e) {
 			res.redirect("/login");
-			return;
+            return;
 		}
-
-		const client = await dcsdk.createClient({authKeyId: credentials.access_id, authKey: credentials.access_key, dragonchainId: credentials.public_id, endpoint: credentials.endpoint_url});
 		
-    	const poll_response = await tools.poll(client);
+    	const poll_response = await dct.poll(client);
         
 		if (poll_response.empty)        
 		{

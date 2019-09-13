@@ -1,33 +1,120 @@
-<div id="node-info">
+<div id="loading">
 	<span class="spinner-border spinner-border-sm text-primary"></span>
-	Loading...
+	<span id="loading-details">Loading...</span>
+</div>
+<div id="node-info" class="d-none">
+	<div class="row">
+		<div class="col-sm-8">
+			<h4>Public ID: <span id="public-id"></span></h4>
+		</div>
+		<div class="col-sm-4 text-right">
+	 		<div id="app-state"></div>
+		</div>
+	</div>
+
+	<div class="bg-light p-3 border">
+		<div class="row mb-2">
+			<div class="col-sm-4">			
+				<b>Node Level:</b><br/>
+				<span id="dc-node-level"></span>
+			</div>	
+
+			<div class="col-sm-4">			
+				<b>Dragonchain Version:</b><br/>
+				<span id="dc-version"></span>			
+			</div>
+
+			<div class="col-sm-4">
+				<b>Block Height:</b><br/>
+				<div id="block-height"></div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-sm-4">
+				<b>Blocks Last 24 Hours:</b><br/>
+				<span id="block-count-day"></span>
+			</div>
+
+			<div class="col-sm-4">
+				<b>Last Block Time:</b><br/>
+				<span id="last-block-date"></span>				
+			</div>
+
+			<div class="col-sm-4">
+				<b>TIME @ Last Block:</b><br/>
+				<span id="dc-time-at-last-block"><span>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<div id="chart"></div>
+		</div>		
+	</div>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<p><b>Last Block:</b></p>
+			<pre class="bg-light border p-2"><code id="last-block"></code></pre>
+		</div>
+	</div>
 </div>
 
+<script src="/pouchdb/pouchdb.min.js"></script>
+<script src="/pouchdb/pouchdb.find.min.js"></script>
+<script src="/moment/min/moment.min.js"></script>
+<script src="/underscore/underscore-min.js"></script>
+<script src='/public/js/explorer-tools.js'></script>
+<script src='/public/js/db.js'></script>
+
 <script type='text/javascript' src='https://www.gstatic.com/charts/loader.js'></script>
-<script type="text/javascript">
+
+<script>
+	var ping = null;
+
 	$(function () {		
+		google.charts.load('current', {packages: ['corechart', 'bar']});
+
 		if (window.localStorage.credentials_secure)
 		{
-			$.ajax({
-				url: "/get-node-info",
-				method: "POST",
-				data: {
-					credentials_secure: window.localStorage.credentials_secure
-				},				
-				dataType: "html"
-			})			
-				.done(function (data) {
-					$("#node-info").html(data);
-					$("#logout")
-						.removeClass("d-none")
-						.click(function () {
-							window.localStorage.removeItem("credentials_secure")							
-							document.location.href = "/";
-						})
-				})			
+			tools.getStatus();
+
+			db.findLastBlock()
+				.then(function (result) {
+					var start_block_id = 0;
+
+					if (result.docs.length > 0)
+					{
+						start_block_id = result.docs[0].block.header.block_id;											
+					} else {
+						start_block_id = 0;						
+					}
+
+					// Get new blocks //
+					tools.getBlocks(start_block_id);	
+					tools.setAppState("Last check: " + moment().format("LTS"));
+
+					ping = setInterval(function () {
+						// Get new blocks //
+						tools.getBlocks(node.last_block.header.block_id);
+						tools.setAppState("Last check: " + moment().format("LTS"));
+					}, 30000)
+					
+				}).catch(function (err) {
+					console.log(err)						
+				})
+		
+			$("#logout")
+				.removeClass("d-none")
+				.click(function () {
+					window.localStorage.removeItem("credentials_secure")							
+					document.location.href = "/";
+				})
 
 		} else {
-			$.get("/login").done(function (data) {$("#node-info").html(data)});
+			$.get("/login").done(function (data) {$("#node-info").html(data).removeClass("d-none")});
 		}
 
 	});	
