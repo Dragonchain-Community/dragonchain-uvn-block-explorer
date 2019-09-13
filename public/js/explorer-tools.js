@@ -11,10 +11,12 @@ var node = {
 	initialized: false
 }
 
+var config = {
+	current_chart: null
+}
+
 var tools = {	
 	refreshUI: function () {
-		console.log("Refreshing UI...");
-
 		$("#public-id").html(node.public_id);
 		$("#dc-node-level").html(node.node_level);
 		$("#dc-version").html(node.dragonchain_version);
@@ -34,29 +36,15 @@ var tools = {
 	setAppState: function (state) {
 		$("#app-state").html(state);
 	},
-	getStatus: function () {
-		$.ajax({
+	getStatus: async function () {
+		return $.ajax({
 			url: "/get-status",
 			method: "POST",
 			data: {
 				credentials_secure: window.localStorage.credentials_secure
 			},				
 			dataType: "html"
-		})		
-			.done(function (data) {
-					var dataObj = JSON.parse(data);
-
-					if (dataObj.error)
-					{
-						tools.redirectToLogin();
-					} else {						
-						console.log(dataObj);
-
-						node.public_id = dataObj.status.id;
-						node.node_level = dataObj.status.level;
-						node.dragonchain_version = dataObj.status.version;
-					}
-				})
+		})	
 			.always(function (data) {
 				tools.refreshUI();
 			})
@@ -138,14 +126,53 @@ var tools = {
 	updateChart: function () {
 		// Get blocks for last x [timeframe] and draw //
 
-		// By Day, 30 Day //
-		var start_timestamp = moment.utc().subtract(13, "days").startOf("day").format("X");
-		
-		db.findBlocksByTimestamp({"$gte": Number(start_timestamp)})
-			.then(function (result) {
-				if (result.docs && result.docs.length > 0)
-					tools.drawBlocksPerDay(tools.parseBlocksByDay(result.docs), "14 Day")
-			})		
+		if (config.current_chart == "#chart-byweek")
+		{
+			var start_timestamp = moment.utc().subtract(23, "weeks").startOf("week").format("X");
+			
+			db.findBlocksByTimestamp({"$gte": Number(start_timestamp)})
+				.then(function (result) {
+					if (result.docs && result.docs.length > 0)
+						tools.drawBlocksPerWeek(tools.parseBlocksByWeek(result.docs), "24 Weeks")
+				})		
+
+		} else if (config.current_chart == "#chart-byday")
+		{		
+			var start_timestamp = moment.utc().subtract(13, "days").startOf("day").format("X");
+			
+			db.findBlocksByTimestamp({"$gte": Number(start_timestamp)})
+				.then(function (result) {
+					if (result.docs && result.docs.length > 0)
+						tools.drawBlocksPerDay(tools.parseBlocksByDay(result.docs), "14 Days")
+				})		
+		} else if (config.current_chart == "#chart-byhour")
+		{		
+			var start_timestamp = moment.utc().subtract(23, "hours").startOf("hour").format("X");
+			
+			db.findBlocksByTimestamp({"$gte": Number(start_timestamp)})
+				.then(function (result) {
+					if (result.docs && result.docs.length > 0)
+						tools.drawBlocksPerHour(tools.parseBlocksByHour(result.docs), "24 Hours")
+				})		
+		}
+	},
+	drawBlocksPerWeek: function (block_groups, time_frame) {
+
+		// Create the data table.
+		var data = new google.visualization.DataTable();
+		data.addColumn('string', 'Week Of');
+		data.addColumn('number', 'Blocks');
+
+		block_groups.forEach(function (element) {
+			data.addRow([element.day, element.times.length])
+		})
+
+		// Set chart options
+		var options = {'title':'Blocks by Week - ' + time_frame, 'width':'100%', 'height':450};
+		// Instantiate and draw our chart, passing in some options.
+		var chart = new google.visualization.ColumnChart(document.getElementById('chart'));
+		chart.draw(data, options);
+
 	},
 	drawBlocksPerDay: function (block_groups, time_frame) {
 
@@ -165,6 +192,24 @@ var tools = {
 		chart.draw(data, options);
 
 	},
+	drawBlocksPerHour: function (block_groups, time_frame) {
+
+		// Create the data table.
+		var data = new google.visualization.DataTable();
+		data.addColumn('string', 'Hour');
+		data.addColumn('number', 'Blocks');
+
+		block_groups.forEach(function (element) {
+			data.addRow([element.hour, element.times.length])
+		})
+
+		// Set chart options
+		var options = {'title':'Blocks by Hour - ' + time_frame, 'width':'100%', 'height':450};
+		// Instantiate and draw our chart, passing in some options.
+		var chart = new google.visualization.ColumnChart(document.getElementById('chart'));
+		chart.draw(data, options);
+
+	},
 	updateBlocksLastDay: function () {
 		
 		var start_timestamp = moment.utc().subtract(23, "hours").startOf("hour").format("X");
@@ -178,6 +223,22 @@ var tools = {
 				}
 			})		
 	},
+	parseBlocksByWeek: function (blocks) {
+        const occurences = [];
+
+        blocks.forEach(function (element) {
+            occurences.push(element.block.header.timestamp * 1000);
+        });
+
+        return _.map(
+            _.groupBy(occurences, function (timestamp) {
+                return moment.utc(timestamp).startOf('week').format("MMM Do");
+            }),
+            function (group, day) {
+                return {day: day, times: group}
+            }
+        );
+    },
 	parseBlocksByDay: function (blocks) {
         const occurences = [];
 

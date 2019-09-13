@@ -49,6 +49,22 @@
 	</div>
 
 	<div class="row">
+		<div class="col-sm-12 text-center pt-3">
+			<ul class="nav nav-pills nav-justified">
+				<li class="nav-item">
+					<a id="chart-byweek" class="chart-option nav-link" href="#">By Week</a>
+				</li>
+				<li class="nav-item">
+					<a id="chart-byday" class="chart-option nav-link" href="#">By Day</a>
+				</li>
+				<li class="nav-item">
+					<a id="chart-byhour" class="chart-option nav-link" href="#">By Hour</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+
+	<div class="row">
 		<div class="col-sm-12">
 			<div id="chart"></div>
 		</div>		
@@ -75,36 +91,69 @@
 	var ping = null;
 
 	$(function () {		
+
+		// Initialize 
+		if (!config.current_chart)
+			config.current_chart = "#chart-byday";
+
+		$(".chart-option")			
+			.click(function () {
+				$(".chart-option").removeClass("active");
+				$(this).addClass("active");
+				config.current_chart = "#" + $(this).attr("id");
+				tools.updateChart();
+			})
+
+
+		$(config.current_chart).addClass("active");
+
+
+
 		google.charts.load('current', {packages: ['corechart', 'bar']});
 
 		if (window.localStorage.credentials_secure)
 		{
-			tools.getStatus();
+			tools.getStatus()
+				.then(function (data) {
 
-			db.findLastBlock()
-				.then(function (result) {
-					var start_block_id = 0;
+					var dataObj = JSON.parse(data);
 
-					if (result.docs.length > 0)
+					if (dataObj.error)
 					{
-						start_block_id = result.docs[0].block.header.block_id;											
-					} else {
-						start_block_id = 0;						
+						tools.redirectToLogin();
+					} else {												
+						node.public_id = dataObj.status.id;
+						node.node_level = dataObj.status.level;
+						node.dragonchain_version = dataObj.status.version;
+
+						db.findLastBlock()
+							.then(function (result) {
+								var start_block_id = 0;
+
+								if (result.docs.length > 0)
+								{
+									start_block_id = result.docs[0].block.header.block_id;											
+								} else {
+									start_block_id = 0;						
+								}
+
+								// Get new blocks //
+								tools.getBlocks(start_block_id);	
+								tools.setAppState("Last check: " + moment().format("LTS"));
+
+								ping = setInterval(function () {
+									// Get new blocks //
+									tools.getBlocks(node.last_block.header.block_id);
+									tools.setAppState("Last check: " + moment().format("LTS"));
+								}, 30000)
+								
+							}).catch(function (err) {
+								console.log(err)						
+							})
 					}
-
-					// Get new blocks //
-					tools.getBlocks(start_block_id);	
-					tools.setAppState("Last check: " + moment().format("LTS"));
-
-					ping = setInterval(function () {
-						// Get new blocks //
-						tools.getBlocks(node.last_block.header.block_id);
-						tools.setAppState("Last check: " + moment().format("LTS"));
-					}, 30000)
-					
-				}).catch(function (err) {
-					console.log(err)						
 				})
+
+			
 		
 			$("#logout")
 				.removeClass("d-none")

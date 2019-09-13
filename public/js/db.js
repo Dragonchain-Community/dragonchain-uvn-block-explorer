@@ -9,14 +9,14 @@ var db = {
 			var result = await db.instance.createIndex({
 			  index: {
 			  	name: "blockid",
-			    fields: ['block.header.block_id']
+			    fields: ['block.header.block_id', 'block.header.dc_id']
 			  }
 			})
 
 			var result = await db.instance.createIndex({
 			  index: {
 			  	name: "timestamp",
-			    fields: ['block.header.timestamp']
+			    fields: ['block.header.timestamp', 'block.header.dc_id', ]
 			  }
 			})
 		}
@@ -47,13 +47,13 @@ var db = {
 		return instance.find(
 		{
 			selector: {
-				"block.header.block_id": {"$gte": null}
+				"block.header.block_id": {"$gte": null},
+				"block.header.dc_id": {"$eq": node.public_id}				
 			}, 
 			sort: 
-			[
-				{
-					"block.header.block_id": "desc"
-				}
+			[				
+				{"block.header.block_id": "desc"},
+				{"block.header.dc_id": "desc"}
 			], 			
 			limit: 1
 		});
@@ -61,12 +61,39 @@ var db = {
 
 	findBlocksByTimestamp: async function (criteria) {
 		var instance = await db.getDB();
-		return instance.find({selector: {"block.header.timestamp": criteria}, sort: [{"block.header.timestamp": "asc"}] })
+		return instance.find(
+			{
+				selector: 
+				{
+					"block.header.timestamp": criteria,
+					"block.header.dc_id": {"$eq": node.public_id}					
+				}, 
+				sort: 
+				[					
+					{"block.header.timestamp": "asc"},
+					{"block.header.dc_id": "desc"}
+				] 
+			});
+
 	},
 
 	findBlocksByBlockId: async function (criteria) {
 		var instance = await db.getDB();
-		return instance.find({selector: {"block.header.block_id": criteria}, sort: [{"block.header.block_id": "asc"}] })
+
+		return instance.find(
+			{
+				selector: 
+				{
+					"block.header.block_id": criteria,
+					"block.header.dc_id": {"$eq": node.public_id}					
+				}, 
+				sort: 
+				[					
+					{"block.header.block_id": "asc"},
+					{"block.header.dc_id": "desc"}
+				] 
+			});
+
 	},
 
 	destroy: async function () {
