@@ -9,14 +9,14 @@ var db = {
 			var result = await db.instance.createIndex({
 			  index: {
 			  	name: "blockid",
-			    fields: ['block.header.block_id', 'block.header.dc_id']
+			    fields: ['block.header.block_id', 'public_id']
 			  }
 			})
 
 			var result = await db.instance.createIndex({
 			  index: {
 			  	name: "timestamp",
-			    fields: ['block.header.timestamp', 'block.header.dc_id', ]
+			    fields: ['block.header.timestamp', 'public_id', ]
 			  }
 			})
 		}
@@ -29,15 +29,15 @@ var db = {
 
 		for (var i = 0; i < blocks.length; i++)
 		{
-			id = blocks[i].header.block_id;
+			id = blocks[i].header.dc_id + "-" + blocks[i].header.block_id;
 			blocks[i].header.block_id = Number(blocks[i].header.block_id);
 			blocks[i].header.timestamp = Number(blocks[i].header.timestamp);
-			docs.push({_id: id, block: blocks[i]});
+			docs.push({_id: id, public_id: node.public_id, block: blocks[i]});
 		}
 
 		var instance = await db.getDB();
 
-		instance.bulkDocs(docs);
+		return instance.bulkDocs(docs);
 	},
 
 	findLastBlock: async function () {
@@ -48,12 +48,12 @@ var db = {
 		{
 			selector: {
 				"block.header.block_id": {"$gte": null},
-				"block.header.dc_id": {"$eq": node.public_id}				
+				"public_id": {"$eq": node.public_id}				
 			}, 
 			sort: 
 			[				
 				{"block.header.block_id": "desc"},
-				{"block.header.dc_id": "desc"}
+				{"public_id": "desc"}
 			], 			
 			limit: 1
 		});
@@ -66,12 +66,12 @@ var db = {
 				selector: 
 				{
 					"block.header.timestamp": criteria,
-					"block.header.dc_id": {"$eq": node.public_id}					
+					"public_id": {"$eq": node.public_id}					
 				}, 
 				sort: 
 				[					
 					{"block.header.timestamp": "asc"},
-					{"block.header.dc_id": "desc"}
+					{"public_id": "desc"}
 				] 
 			});
 
@@ -85,12 +85,12 @@ var db = {
 				selector: 
 				{
 					"block.header.block_id": criteria,
-					"block.header.dc_id": {"$eq": node.public_id}					
+					"public_id": {"$eq": node.public_id}					
 				}, 
 				sort: 
 				[					
 					{"block.header.block_id": "asc"},
-					{"block.header.dc_id": "desc"}
+					{"public_id": "desc"}
 				] 
 			});
 
@@ -99,7 +99,7 @@ var db = {
 	destroy: async function () {
 		var instance = await db.getDB();
 
-		instance.destroy()
+		return instance.destroy()
 	}
 
 }

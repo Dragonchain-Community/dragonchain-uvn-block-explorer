@@ -85,47 +85,6 @@ const main = async() => {
 		}
 	}));
 
-	app.post('/get-node-info', awaitHandlerFactory(async (req, res) => {
-
-		try {
-			const client = dct.createClient(req.body.credentials_secure, config.salt);
-		} catch (e) {
-			res.redirect("/login");
-            return;
-		}
-		
-    	const poll_response = await dct.poll(client);
-        
-		if (poll_response.empty)        
-		{
-    		res.redirect("/noblocks");
-    	} else {
-			const blocksByHour = tools.parseBlocksByHour(poll_response.blocks_day);
-
-			res.render('node-info', {
-				layout: false,			
-				chain_id: poll_response.status.id,
-				chain_level: poll_response.status.level,
-				chain_version: poll_response.status.version,
-
-				status: poll_response.status,
-
-				last_block: poll_response.last_block,
-				last_block_time: moment.utc(poll_response.last_block.header.timestamp * 1000).format('lll'),
-				last_block_time_since: moment.utc(poll_response.last_block.header.timestamp * 1000).fromNow(),
-				last_block_drgn_time: poll_response.last_block.header.current_ddss,
-
-				block_height: poll_response.last_block.header.block_id,
-				blocks: poll_response.blocks_day,
-				blocks_by_hour: blocksByHour,
-				blocks_by_day: poll_response.blocks_week,
-				blocks_last_24_hours: poll_response.blocks_day.length,
-
-				takara_price: poll_response.takara_price
-			});
-		}
-	}));
-
     app.use(function (err, req, res, next) {
         console.log(err);
 

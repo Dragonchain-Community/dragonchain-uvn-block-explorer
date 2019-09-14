@@ -15,17 +15,21 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
     <a class="navbar-brand" href="#">{{title}}</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarText">
-      <ul class="navbar-nav mr-auto">
-
-      </ul>
-      <span class="navbar-text">
-        <button id="logout" class="btn btn-primary d-none">Logout</button>  
-      </span>
-    </div>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav w-100">        
+        <li class="nav-item dropdown ml-auto">
+          <a class="nav-link dropdown-toggle btn btn-outline-secondary" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Options
+          </a>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+            <a id="resetdb" class="dropdown-item" href="#">Reset Database</a>
+            <a id="logout" class="dropdown-item d-none" href="#">Logout</a>
+          </div>
+        </li>
+      </ul>    
   </nav>
 
   <main role="main" class="container">
@@ -35,5 +39,30 @@
   </main><!-- /.container -->  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+  <script src="/pouchdb/pouchdb.min.js"></script>
+  <script src="/pouchdb/pouchdb.find.min.js"></script>
+  <script src="/moment/min/moment.min.js"></script>
+  <script src="/underscore/underscore-min.js"></script>
+  <script src='/public/js/explorer-tools.js'></script>
+  <script src='/public/js/db.js'></script>
+
+  <script type='text/javascript' src='https://www.gstatic.com/charts/loader.js'></script>
+  <script>
+    $(function () {
+      $("#resetdb")
+        .removeClass("d-none")
+        .click(function () {
+          if (confirm("This will delete your entire database and rebuild it from scratch. Are you sure you wish to continue?"))
+          {
+            db.destroy()
+              .then(function (response) {
+                location.reload();
+              });
+            
+          }         
+        })
+    })
+  </script>
 </body>
 </html>

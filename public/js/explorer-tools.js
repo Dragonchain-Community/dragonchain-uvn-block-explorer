@@ -5,6 +5,7 @@ var node = {
 	block_height: null,
 	block_count_day: null,
 	last_block: null,
+	last_block_id: null,
 	last_block_date: null,
 	time_at_last_block: null,
 	last_update: null,
@@ -12,6 +13,8 @@ var node = {
 }
 
 var config = {
+	blocks_per_pull: 2500,
+	ping_delay: 15000,	
 	current_chart: null
 }
 
@@ -50,8 +53,9 @@ var tools = {
 			})
 
 	},
-	getBlocks: function (start_block_id) {	
-		$.ajax({
+	getBlocksChunk: async function (start_block_id)
+	{
+		return $.ajax({
 			url: "/get-blocks",
 			method: "POST",
 			data: {
@@ -59,65 +63,32 @@ var tools = {
 				start_block_id: start_block_id
 			},				
 			dataType: "html"
-		})		
-			.done(function (data) {
-					var dataObj = JSON.parse(data);
-
-					if (dataObj.error)
-					{
-						tools.redirectToLogin();
-					} else {												
-						if (dataObj.blocks.length > 0)
-						{
-							// Update the database //
-							db.addBlocks(dataObj.blocks);
-
-							// If there are more new blocks remaining, go again //
-							if (dataObj.blocks_remaining > 0)
-							{
-								tools.setAppState("Retrieving new blocks (" + dataObj.blocks_remaining + " left)");
-								tools.getBlocks(dataObj.last_block_id);
-							} else {			
-								tools.setAppState("");
-
-								node.last_update = moment.utc();																
-
-								// Update last block and chart data //
-								tools.updateLastBlock();
-								tools.updateBlocksLastDay();
-								tools.updateChart();
-							}
-						} else {
-							if (!node.initialized)
-							{
-								node.last_update = moment.utc();								
-								node.initialized = true;
-
-								tools.updateLastBlock();
-								tools.updateBlocksLastDay();
-								tools.updateChart();
-							}
-							if (node.last_block)
-								node.last_block_date = moment.utc(node.last_block.header.timestamp * 1000).format('lll') + " UTC (" + moment.utc(node.last_block.header.timestamp * 1000).fromNow() + ")";							
-							
-							tools.refreshUI();
-						}
-					}
-				})
-
+		})	
 	},
-	updateLastBlock: function (block) {
+	getBlocks: async function (start_block_id, max_block_id) {	
+		var chunk = JSON.parse(await tools.getBlocksChunk(start_block_id));
+
+		if (chunk.blocks_remaining > 0 && Number(chunk.last_block_id) + 50 <= max_block_id)
+		{		
+			tools.setAppState("Retrieving new blocks (" + chunk.blocks_remaining + " left)");
+			return chunk.blocks.concat(await tools.getBlocks(chunk.last_block_id, max_block_id));
+		} else {			
+			return chunk.blocks;
+		}
+	},
+	updateLastBlock: function (block) {		
 		// Get the latest block and update node stats //
 		db.findLastBlock()
-			.then(function (result) {				
+			.then(function (result) {								
 				if (result.docs.length > 0)
-				{
+				{					
 					block = result.docs[0].block;					
 					node.last_block = block;
+					node.last_block_id = block.header.block_id;
 					node.block_height = block.header.block_id;
-					node.last_block_date = moment.utc(block.header.timestamp * 1000).format('lll') + " UTC (" + moment.utc(block.header.timestamp * 1000).fromNow() + ")";
+					node.last_block_date = moment(block.header.timestamp * 1000).format('lll') + " (" + moment(block.header.timestamp * 1000).fromNow() + ")";
 					node.time_at_last_block = block.header.current_ddss;					
-					tools.refreshUI();
+					tools.refreshUI();					
 				} 
 			}).catch(function (err) {
 				console.log(err)										
@@ -232,7 +203,7 @@ var tools = {
 
         return _.map(
             _.groupBy(occurences, function (timestamp) {
-                return moment.utc(timestamp).startOf('week').format("MMM Do");
+                return moment(timestamp).startOf('week').format("MMM Do");
             }),
             function (group, day) {
                 return {day: day, times: group}
@@ -248,7 +219,7 @@ var tools = {
 
         return _.map(
             _.groupBy(occurences, function (timestamp) {
-                return moment.utc(timestamp).startOf('day').format("MMM Do");
+                return moment(timestamp).startOf('day').format("MMM Do");
             }),
             function (group, day) {
                 return {day: day, times: group}
@@ -264,7 +235,7 @@ var tools = {
 
         return _.map(
             _.groupBy(occurences, function (timestamp) {
-                return moment.utc(timestamp).startOf('hour').format("HH:mm");
+                return moment(timestamp).startOf('hour').format("HH:mm");
             }),
             function (group, hour) {
                 return {hour: hour, times: group}
