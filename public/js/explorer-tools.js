@@ -247,7 +247,7 @@ var tools = {
 
         return _.map(
             _.groupBy(occurences, function (timestamp) {
-                return moment(timestamp).startOf('hour').format("HH:mm");
+                return moment(timestamp).startOf('hour').format("LT");
             }),
             function (group, hour) {
                 return {hour: hour, times: group}
