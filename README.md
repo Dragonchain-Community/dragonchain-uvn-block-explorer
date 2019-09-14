@@ -19,3 +19,12 @@ Stub:
 6. Run ```node server.js``` (or ```npm start``` for development: will restart the server on every file change)
 7. Go to 127.0.0.1:3000 in your browser
 
+Press CTRL+C in the Git Bash or Command Prompt window to end the server process.
+
+## Note for Windows NodeJS users
+
+The processes started by running our server can end up hanging. You can force Windows to kill the process with the following command:
+
+```taskkill /IM node.exe /F``` in a Windows command prompt or
+
+```taskkill -IM node.exe -F``` in Git Bash
