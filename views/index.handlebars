@@ -138,7 +138,7 @@
 													db.addBlocks(new_blocks)
 														.then(function () {																		
 															// Update last block and chart data //
-															tools.updateLastBlock();
+															tools.updateLastBlock(new_blocks[new_blocks.length-1]);
 															tools.updateBlocksLastDay();
 															tools.updateChart();
 

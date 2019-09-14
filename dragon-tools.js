@@ -25,7 +25,11 @@ module.exports  = {
     },
     getBlocks: async function (client, start_block_id)
     {
-        const blocks_response = this.validateResponse(await client.queryBlocks({ luceneQuery: `block_id:>${start_block_id}`, limit: 50, sort: "block_id:asc"}));
+        const start_timestamp = moment.utc().subtract(5, "months").startOf("month").format("X");
+
+        //const start_timestamp = 0;
+
+        const blocks_response = this.validateResponse(await client.queryBlocks({ luceneQuery: `block_id:>${start_block_id} AND timestamp:>=${start_timestamp}`, limit: 50, sort: "block_id:asc"}));
 
         let blocks = [];
         let last_block_id = start_block_id;

@@ -13,7 +13,7 @@ var node = {
 }
 
 var config = {
-	blocks_per_pull: 2500,
+	blocks_per_pull: 10000,
 	ping_delay: 15000,	
 	current_chart: null
 }
@@ -68,6 +68,8 @@ var tools = {
 	getBlocks: async function (start_block_id, max_block_id) {	
 		var chunk = JSON.parse(await tools.getBlocksChunk(start_block_id));
 
+		//console.log(chunk);
+
 		if (chunk.blocks_remaining > 0 && Number(chunk.last_block_id) + 50 <= max_block_id)
 		{		
 			tools.setAppState("Retrieving new blocks (" + chunk.blocks_remaining + " left)");
@@ -77,22 +79,32 @@ var tools = {
 		}
 	},
 	updateLastBlock: function (block) {		
-		// Get the latest block and update node stats //
-		db.findLastBlock()
-			.then(function (result) {								
-				if (result.docs.length > 0)
-				{					
-					block = result.docs[0].block;					
-					node.last_block = block;
-					node.last_block_id = block.header.block_id;
-					node.block_height = block.header.block_id;
-					node.last_block_date = moment(block.header.timestamp * 1000).format('lll') + " (" + moment(block.header.timestamp * 1000).fromNow() + ")";
-					node.time_at_last_block = block.header.current_ddss;					
-					tools.refreshUI();					
-				} 
-			}).catch(function (err) {
-				console.log(err)										
-			})
+		if (block)
+		{
+			node.last_block = block;
+			node.last_block_id = block.header.block_id;
+			node.block_height = block.header.block_id;
+			node.last_block_date = moment(block.header.timestamp * 1000).format('lll') + " (" + moment(block.header.timestamp * 1000).fromNow() + ")";
+			node.time_at_last_block = block.header.current_ddss;					
+			tools.refreshUI();					
+		} else {
+			// Get the latest block and update node stats //
+			db.findLastBlock()
+				.then(function (result) {								
+					if (result.docs.length > 0)
+					{					
+						block = result.docs[0].block;					
+						node.last_block = block;
+						node.last_block_id = block.header.block_id;
+						node.block_height = block.header.block_id;
+						node.last_block_date = moment(block.header.timestamp * 1000).format('lll') + " (" + moment(block.header.timestamp * 1000).fromNow() + ")";
+						node.time_at_last_block = block.header.current_ddss;					
+						tools.refreshUI();					
+					} 
+				}).catch(function (err) {
+					console.log(err)										
+				})
+		}
 	},
 	updateChart: function () {
 		// Get blocks for last x [timeframe] and draw //

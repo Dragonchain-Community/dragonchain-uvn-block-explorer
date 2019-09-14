@@ -65,7 +65,7 @@ const main = async() => {
 			res.send(JSON.stringify(status));		
 		} catch (e) {
 			console.log(e);
-			res.send(JSON.stringify({"error":"login"}));
+			res.send(JSON.stringify({"error":e}));
             return;
 		}
 	}));
@@ -80,7 +80,7 @@ const main = async() => {
 			res.send(JSON.stringify(blocks));		
 		} catch (e) {
 			console.log(e);
-			res.send(JSON.stringify({"error":"login"}));
+			res.send(JSON.stringify({"error":e}));
             return;
 		}
 	}));
