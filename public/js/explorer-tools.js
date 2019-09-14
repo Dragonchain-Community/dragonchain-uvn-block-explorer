@@ -79,7 +79,7 @@ var tools = {
 		}
 	},
 	updateLastBlock: function (block) {		
-		if (block)
+		if (block !== undefined)
 		{
 			node.last_block = block;
 			node.last_block_id = block.header.block_id;
