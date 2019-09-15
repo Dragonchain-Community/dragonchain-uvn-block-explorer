@@ -125,15 +125,18 @@
 								if (result)
 								{
 									node.last_block = result.block;
-									node.last_block_id = result.block.header.block_id;											
+									node.last_block_id = Number(result.block.header.block_id);
 								} else {
 									node.last_block_id = 0;
 								}
 
 								var ping = function () {										
 									try {
+
+										var max_id = node.last_block_id + config.blocks_per_pull;
+
 										// Get new blocks //
-										tools.getBlocks(node.last_block_id, node.last_block_id + config.blocks_per_pull)
+										tools.getBlocks(node.last_block_id, max_id)
 											.then(function (new_blocks) {
 												if (new_blocks.length > 0)											
 												{

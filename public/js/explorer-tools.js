@@ -13,7 +13,7 @@ var node = {
 }
 
 var config = {
-	blocks_per_pull: 5000,
+	blocks_per_pull: 5000, // Stupid IE/Edge
 	ping_delay: 15000,	
 	current_chart: null
 }
@@ -68,8 +68,6 @@ var tools = {
 	getBlocks: async function (start_block_id, max_block_id) {	
 		var chunk = JSON.parse(await tools.getBlocksChunk(start_block_id));
 
-		//console.log(chunk);
-
 		if (chunk.blocks_remaining > 0 && Number(chunk.last_block_id) + 50 <= max_block_id)
 		{		
 			tools.setAppState("Retrieving new blocks (" + chunk.blocks_remaining + " left)");
@@ -82,7 +80,7 @@ var tools = {
 		if (block !== undefined)
 		{
 			node.last_block = block;
-			node.last_block_id = block.header.block_id;
+			node.last_block_id = Number(block.header.block_id);
 			node.block_height = block.header.block_id;
 			node.last_block_date = moment(block.header.timestamp * 1000).format('lll') + " (" + moment(block.header.timestamp * 1000).fromNow() + ")";
 			node.time_at_last_block = block.header.current_ddss;					
@@ -95,7 +93,7 @@ var tools = {
 					{					
 						block = result.block;					
 						node.last_block = block;
-						node.last_block_id = block.header.block_id;
+						node.last_block_id = Number(block.header.block_id);
 						node.block_height = block.header.block_id;
 						node.last_block_date = moment(block.header.timestamp * 1000).format('lll') + " (" + moment(block.header.timestamp * 1000).fromNow() + ")";
 						node.time_at_last_block = block.header.current_ddss;					
