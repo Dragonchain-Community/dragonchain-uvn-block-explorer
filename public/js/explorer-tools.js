@@ -13,7 +13,7 @@ var node = {
 }
 
 var config = {
-	blocks_per_pull: 10000,
+	blocks_per_pull: 5000,
 	ping_delay: 15000,	
 	current_chart: null
 }
