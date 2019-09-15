@@ -36,7 +36,7 @@ const main = async() => {
 	app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
 	app.use('/moment', express.static(__dirname + '/node_modules/moment/'));
 	app.use('/underscore', express.static(__dirname + '/node_modules/underscore/'));
-	app.use('/pouchdb', express.static(__dirname + '/node_modules/pouchdb/dist/'));
+	app.use('/dexie', express.static(__dirname + '/node_modules/dexie/dist/'));
 	app.use('/chartjs', express.static(__dirname + '/node_modules/chart.js/dist/'));
 
 	app.get('/', awaitHandlerFactory(async (req, res) => {

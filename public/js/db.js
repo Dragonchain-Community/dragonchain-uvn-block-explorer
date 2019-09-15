@@ -4,20 +4,10 @@ var db = {
 	getDB: async function() {
 		if (!db.instance)
 		{
-			db.instance = new PouchDB('dcbe');
+			db.instance = new Dexie("dcbe");
 
-			var result = await db.instance.createIndex({
-			  index: {
-			  	name: "blockid",
-			    fields: ['block.header.block_id', 'public_id']
-			  }
-			})
-
-			var result = await db.instance.createIndex({
-			  index: {
-			  	name: "timestamp",
-			    fields: ['block.header.timestamp', 'public_id', ]
-			  }
+			db.instance.version(1).stores({
+				blocks: "++id, public_id, block_id, timestamp"
 			})
 		}
 
@@ -29,77 +19,32 @@ var db = {
 
 		for (var i = 0; i < blocks.length; i++)
 		{
-			id = blocks[i].header.dc_id + "-" + blocks[i].header.block_id;
-			blocks[i].header.block_id = Number(blocks[i].header.block_id);
-			blocks[i].header.timestamp = Number(blocks[i].header.timestamp);
-			docs.push({_id: id, public_id: node.public_id, block: blocks[i]});
+			docs.push({
+				public_id: node.public_id, block_id: Number(blocks[i].header.block_id), timestamp: Number(blocks[i].header.timestamp), block: blocks[i]
+			});
 		}
 
 		var instance = await db.getDB();
 
-		return instance.bulkDocs(docs);
+		return instance.blocks.bulkAdd(docs);
 	},
 
-	findLastBlock: async function () {
-		//return db.getDB().allDocs({descending: true, limit: 1})
+	findLastBlock: async function () {		
 		var instance = await db.getDB();
 
-		return instance.find(
-		{
-			selector: {
-				"block.header.block_id": {"$gte": null},
-				"public_id": {"$eq": node.public_id}				
-			}, 
-			sort: 
-			[				
-				{"block.header.block_id": "desc"},
-				{"public_id": "desc"}
-			], 			
-			limit: 1
-		});
+		return instance.blocks.orderBy('block_id').last();
 	},
 
-	findBlocksByTimestamp: async function (criteria) {
+	findBlocksByTimestampAboveOrEqual: async function (criteria) {
 		var instance = await db.getDB();
-		return instance.find(
-			{
-				selector: 
-				{
-					"block.header.timestamp": criteria,
-					"public_id": {"$eq": node.public_id}					
-				}, 
-				sort: 
-				[					
-					{"block.header.timestamp": "asc"},
-					{"public_id": "desc"}
-				] 
-			});
-
-	},
-
-	findBlocksByBlockId: async function (criteria) {
-		var instance = await db.getDB();
-
-		return instance.find(
-			{
-				selector: 
-				{
-					"block.header.block_id": criteria,
-					"public_id": {"$eq": node.public_id}					
-				}, 
-				sort: 
-				[					
-					{"block.header.block_id": "asc"},
-					{"public_id": "desc"}
-				] 
-			});
+		return instance.blocks.where("timestamp").aboveOrEqual(criteria).sortBy("timestamp");
 
 	},
 
 	destroy: async function () {
 		var instance = await db.getDB();
 
-		return instance.destroy()
+		return instance.delete()
 	}
 
 }

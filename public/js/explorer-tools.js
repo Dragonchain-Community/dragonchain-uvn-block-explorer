@@ -91,9 +91,9 @@ var tools = {
 			// Get the latest block and update node stats //
 			db.findLastBlock()
 				.then(function (result) {								
-					if (result.docs.length > 0)
+					if (result)
 					{					
-						block = result.docs[0].block;					
+						block = result.block;					
 						node.last_block = block;
 						node.last_block_id = block.header.block_id;
 						node.block_height = block.header.block_id;
@@ -109,35 +109,63 @@ var tools = {
 	updateChart: function () {
 		// Get blocks for last x [timeframe] and draw //
 
-		if (config.current_chart == "#chart-byweek")
+		if (config.current_chart == "#chart-bymonth")
+		{
+			var start_timestamp = moment.utc().subtract(5, "months").startOf("month").format("X");
+			
+			db.findBlocksByTimestampAboveOrEqual(Number(start_timestamp))
+				.then(function (result) {
+					if (result && result.length > 0)
+						tools.drawBlocksPerMonth(tools.parseBlocksByMonth(result), "6 Months")
+				})		
+
+		} else if (config.current_chart == "#chart-byweek")
 		{
 			var start_timestamp = moment.utc().subtract(11, "weeks").startOf("week").format("X");
 			
-			db.findBlocksByTimestamp({"$gte": Number(start_timestamp)})
+			db.findBlocksByTimestampAboveOrEqual(Number(start_timestamp))
 				.then(function (result) {
-					if (result.docs && result.docs.length > 0)
-						tools.drawBlocksPerWeek(tools.parseBlocksByWeek(result.docs), "12 Weeks")
+					if (result && result.length > 0)
+						tools.drawBlocksPerWeek(tools.parseBlocksByWeek(result), "12 Weeks")
 				})		
 
 		} else if (config.current_chart == "#chart-byday")
 		{		
 			var start_timestamp = moment.utc().subtract(13, "days").startOf("day").format("X");
 			
-			db.findBlocksByTimestamp({"$gte": Number(start_timestamp)})
-				.then(function (result) {
-					if (result.docs && result.docs.length > 0)
-						tools.drawBlocksPerDay(tools.parseBlocksByDay(result.docs), "14 Days")
+			db.findBlocksByTimestampAboveOrEqual(Number(start_timestamp))
+				.then(function (result) {					
+					if (result && result.length > 0)
+						tools.drawBlocksPerDay(tools.parseBlocksByDay(result), "14 Days")
 				})		
 		} else if (config.current_chart == "#chart-byhour")
 		{		
 			var start_timestamp = moment.utc().subtract(23, "hours").startOf("hour").format("X");
 			
-			db.findBlocksByTimestamp({"$gte": Number(start_timestamp)})
+			db.findBlocksByTimestampAboveOrEqual(Number(start_timestamp))
 				.then(function (result) {
-					if (result.docs && result.docs.length > 0)
-						tools.drawBlocksPerHour(tools.parseBlocksByHour(result.docs), "24 Hours")
+					if (result && result.length > 0)
+						tools.drawBlocksPerHour(tools.parseBlocksByHour(result), "24 Hours")
 				})		
 		}
+	},
+	drawBlocksPerMonth: function (block_groups, time_frame) {
+
+		// Create the data table.
+		var data = new google.visualization.DataTable();
+		data.addColumn('string', 'Month');
+		data.addColumn('number', 'Blocks');
+
+		block_groups.forEach(function (element) {
+			data.addRow([element.month, element.times.length])
+		})
+
+		// Set chart options
+		var options = {'title':'Blocks by Month - ' + time_frame, 'width':'100%', 'height':450};
+		// Instantiate and draw our chart, passing in some options.
+		var chart = new google.visualization.ColumnChart(document.getElementById('chart'));
+		chart.draw(data, options);
+
 	},
 	drawBlocksPerWeek: function (block_groups, time_frame) {
 
@@ -197,15 +225,31 @@ var tools = {
 		
 		var start_timestamp = moment.utc().subtract(23, "hours").startOf("hour").format("X");
 		
-		db.findBlocksByTimestamp({"$gte": Number(start_timestamp)})
+		db.findBlocksByTimestampAboveOrEqual(Number(start_timestamp))
 			.then(function (result) {
-				if (result.docs && result.docs.length > 0)
+				if (result && result.length > 0)
 				{
-					node.block_count_day = result.docs.length;
+					node.block_count_day = result.length;
 					tools.refreshUI();
 				}
 			})		
 	},
+	parseBlocksByMonth: function (blocks) {
+        const occurences = [];
+
+        blocks.forEach(function (element) {
+            occurences.push(element.block.header.timestamp * 1000);
+        });
+
+        return _.map(
+            _.groupBy(occurences, function (timestamp) {
+                return moment(timestamp).startOf('month').format("MMM Do");
+            }),
+            function (group, month) {
+                return {month: month, times: group}
+            }
+        );
+    },
 	parseBlocksByWeek: function (blocks) {
         const occurences = [];
 

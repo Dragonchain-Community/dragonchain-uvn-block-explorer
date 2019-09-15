@@ -52,6 +52,9 @@
 		<div class="col-sm-12 text-center pt-3">
 			<ul class="nav nav-pills nav-justified">
 				<li class="nav-item">
+					<a id="chart-bymonth" class="chart-option nav-link" href="#">By Month</a>
+				</li>
+				<li class="nav-item">
 					<a id="chart-byweek" class="chart-option nav-link" href="#">By Week</a>
 				</li>
 				<li class="nav-item">
@@ -119,10 +122,10 @@
 							.then(function (result) {
 								var start_block_id = 0;
 
-								if (result.docs.length > 0)
+								if (result)
 								{
-									node.last_block = result.docs[0].block;
-									node.last_block_id = result.docs[0].block.header.block_id;											
+									node.last_block = result.block;
+									node.last_block_id = result.block.header.block_id;											
 								} else {
 									node.last_block_id = 0;
 								}
