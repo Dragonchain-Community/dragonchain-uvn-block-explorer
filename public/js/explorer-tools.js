@@ -70,6 +70,7 @@ var tools = {
 
 		if (chunk.blocks_remaining > 0 && Number(chunk.last_block_id) + 50 <= max_block_id)
 		{		
+			//await sleep(500);
 			tools.setAppState("Retrieving new blocks (" + chunk.blocks_remaining + " left)");
 			return chunk.blocks.concat(await tools.getBlocks(chunk.last_block_id, max_block_id));
 		} else {			
@@ -300,3 +301,7 @@ var tools = {
 		document.location.href = "/login";
 	}
 } 
+
+var sleep = function (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
