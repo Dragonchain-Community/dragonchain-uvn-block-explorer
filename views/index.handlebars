@@ -138,7 +138,7 @@
 										// Get new blocks //
 										tools.getBlocks(node.last_block_id, max_id)
 											.then(function (new_blocks) {
-												if (new_blocks.length > 0)											
+												if (new_blocks && new_blocks.length > 0)											
 												{
 													// Update the database //													
 													db.addBlocks(new_blocks)
