@@ -28,15 +28,14 @@ module.exports  = {
         const start_timestamp = moment.utc().subtract(5, "months").startOf("month").format("X");
 
         //const start_timestamp = 0;
-        //console.log(`@block_id:[(${start_block_id} +inf] @timestamp:[${start_timestamp} +inf]`)
+        
         const blocks_response = this.validateResponse(await client.queryBlocks({ redisearchQuery: `@block_id:[(${start_block_id} +inf] @timestamp:[${start_timestamp} +inf]`, limit: 50, sortBy: "block_id", sortAscending: true}));
 
         let blocks = [];
         let last_block_id = start_block_id;
 
         if (blocks_response.response.results.length > 0)
-        {            
-            console.log(`Got ${blocks_response.response.results.length} blocks`)
+        {   
             for (let i = 0; i < blocks_response.response.results.length; i++)
             {
                 element = blocks_response.response.results[i];
