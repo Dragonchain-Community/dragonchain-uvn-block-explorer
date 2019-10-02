@@ -55,6 +55,19 @@ const main = async() => {
 		res.render('empty-node', {title: "Dragonchain UVN Block Explorer", layout: false});
 	}));	
 
+	app.get('/get-takara-price', awaitHandlerFactory(async (req, res) => {
+
+		try {			
+			const price = await dct.getTakaraPrice();
+
+			res.send(JSON.stringify({takara_price: price}));		
+		} catch (e) {
+			console.log(e);
+			res.send(JSON.stringify({"error":e}));
+            return;
+		}
+	}));
+
 	app.post('/get-status', awaitHandlerFactory(async (req, res) => {
 
 		try {			

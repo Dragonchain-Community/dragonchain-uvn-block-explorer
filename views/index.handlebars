@@ -30,7 +30,7 @@
 			</div>
 		</div>
 
-		<div class="row">
+		<div class="row mb-2">
 			<div class="col-sm-4">
 				<b>Blocks Last 24 Hours:</b><br/>
 				<span id="block-count-day"></span>
@@ -45,6 +45,18 @@
 				<b>TIME @ Last Block:</b><br/>
 				<span id="dc-time-at-last-block"><span>
 			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-sm-4">
+				<b>Distinct L1s Validated:</b><br/>
+				<span id="distinct-l1s"></span>
+			</div>
+			<div class="col-sm-4">
+				<b>Current Takara Price:</b><br/>
+				<span id="takara-price"></span>
+			</div>
+			
 		</div>
 	</div>
 
@@ -108,6 +120,8 @@
 
 		if (window.localStorage.credentials_secure)
 		{
+			tools.setTakaraPrice();
+			
 			tools.getStatus()
 				.then(function (data) {
 

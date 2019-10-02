@@ -8,6 +8,7 @@ var node = {
 	last_block_id: null,
 	last_block_date: null,
 	time_at_last_block: null,
+	distinct_l1s: null,
 	last_update: null,
 	initialized: false
 }
@@ -28,10 +29,9 @@ var tools = {
 		if (node.last_block)
 		{
 			$("#last-block-date").html(node.last_block_date);
-			$("#dc-time-at-last-block").html(node.time_at_last_block);
-			//$("#last-block").html(JSON.stringify(node.last_block, null, 2));
+			$("#dc-time-at-last-block").html(node.time_at_last_block);			
 			$("#block-height").html(node.block_height);
-			$("#block-count-day").html(node.block_count_day);
+			$("#block-count-day").html(node.block_count_day);			
 		}
 
 		$("#loading").addClass("d-none");
@@ -78,6 +78,26 @@ var tools = {
 			return chunk.blocks;
 		}
 	},
+
+	setTakaraPrice: function () {
+		$.ajax({
+			url: "/get-takara-price",
+			method: "GET",			
+			dataType: "html"
+		}).then(function (data) {
+			let dj = JSON.parse(data);
+
+			$("#takara-price").html(dj.takara_price);
+		})
+	},
+	updateDistinctL1s: function () {
+		db.findBlocksByTimestampAboveOrEqual(0)
+			.then(function (list) {    
+				const distinctL1s = [...new Set(list.map(x => x.block.validation.dc_id))]
+				node.distinct_l1s = distinctL1s.length;
+				$("#distinct-l1s").html(node.distinct_l1s);
+			})
+	},
 	updateLastBlock: function (block) {		
 		if (block !== undefined)
 		{
@@ -85,7 +105,8 @@ var tools = {
 			node.last_block_id = Number(block.header.block_id);
 			node.block_height = block.header.block_id;
 			node.last_block_date = moment(block.header.timestamp * 1000).format('lll') + " (" + moment(block.header.timestamp * 1000).fromNow() + ")";
-			node.time_at_last_block = block.header.current_ddss;								
+			node.time_at_last_block = block.header.current_ddss;		
+			tools.updateDistinctL1s();						
 			tools.updateBlockBrowserList();
 			tools.refreshUI();					
 		} else {
@@ -100,7 +121,7 @@ var tools = {
 						node.block_height = block.header.block_id;
 						node.last_block_date = moment(block.header.timestamp * 1000).format('lll') + " (" + moment(block.header.timestamp * 1000).fromNow() + ")";
 						node.time_at_last_block = block.header.current_ddss;					
-
+						tools.updateDistinctL1s();
 						tools.refreshUI();					
 					} 
 				}).catch(function (err) {
