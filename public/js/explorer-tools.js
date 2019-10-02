@@ -15,7 +15,8 @@ var node = {
 var config = {
 	blocks_per_pull: 5000, // Stupid IE/Edge
 	ping_delay: 15000,	
-	current_chart: null
+	current_chart: null,
+	current_block_displayed: null
 }
 
 var tools = {	
@@ -28,7 +29,7 @@ var tools = {
 		{
 			$("#last-block-date").html(node.last_block_date);
 			$("#dc-time-at-last-block").html(node.time_at_last_block);
-			$("#last-block").html(JSON.stringify(node.last_block, null, 2));
+			//$("#last-block").html(JSON.stringify(node.last_block, null, 2));
 			$("#block-height").html(node.block_height);
 			$("#block-count-day").html(node.block_count_day);
 		}
@@ -84,7 +85,8 @@ var tools = {
 			node.last_block_id = Number(block.header.block_id);
 			node.block_height = block.header.block_id;
 			node.last_block_date = moment(block.header.timestamp * 1000).format('lll') + " (" + moment(block.header.timestamp * 1000).fromNow() + ")";
-			node.time_at_last_block = block.header.current_ddss;					
+			node.time_at_last_block = block.header.current_ddss;								
+			tools.updateBlockBrowserList();
 			tools.refreshUI();					
 		} else {
 			// Get the latest block and update node stats //
@@ -98,12 +100,45 @@ var tools = {
 						node.block_height = block.header.block_id;
 						node.last_block_date = moment(block.header.timestamp * 1000).format('lll') + " (" + moment(block.header.timestamp * 1000).fromNow() + ")";
 						node.time_at_last_block = block.header.current_ddss;					
+
 						tools.refreshUI();					
 					} 
 				}).catch(function (err) {
 					console.log(err)										
 				})
 		}
+
+		if (config.current_block_displayed === null && node.last_block !== null)
+		{
+			config.current_block_displayed = node.last_block;			
+			tools.updateBlockDisplayed(node.last_block_id)
+				.then(function (block) {tools.updateBlockBrowserList()});			
+		}
+	},
+	updateBlockDisplayed: async function (block_id) {		
+		db.getBlockById(block_id)
+			.then(function (block_record) {				
+				config.current_block_displayed = block_record.block;
+				$("#current-block").html(JSON.stringify(block_record.block, null, 2))
+				return block_record.block;
+			})
+		
+	},
+	updateBlockBrowserList: function () {
+		db.getBlocks(50)
+			.then(function (blocks) {								
+				$("#block-list").html("");
+
+				for (var i = 0; i < blocks.length; i++)
+				{					
+					let elem = $("<button class='list-group-item list-group-item-action btn-select-block' rel='" + blocks[i].block_id + "' />").text("Block #" + blocks[i].block_id)
+					
+					if (blocks[i].block_id == config.current_block_displayed.header.block_id)					
+						elem.addClass("active")
+
+					$("#block-list").append(elem);
+				}
+			})
 	},
 	updateChart: function () {
 		// Get blocks for last x [timeframe] and draw //

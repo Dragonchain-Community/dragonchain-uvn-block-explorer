@@ -29,13 +29,13 @@ module.exports  = {
 
         //const start_timestamp = 0;
         
-        const blocks_response = this.validateResponse(await client.queryBlocks({ redisearchQuery: `@block_id:[(${start_block_id} +inf] @timestamp:[${start_timestamp} +inf]`, limit: 50, sortBy: "block_id", sortAscending: true}));
+        const blocks_response = this.validateResponse(await client.queryBlocks({ redisearchQuery: `@block_id:[(${start_block_id} +inf] @timestamp:[${start_timestamp} +inf]`, limit: 500, sortBy: "block_id", sortAscending: true}));
 
         let blocks = [];
         let last_block_id = start_block_id;
 
         if (blocks_response.response.results.length > 0)
-        {   
+        {               
             for (let i = 0; i < blocks_response.response.results.length; i++)
             {
                 element = blocks_response.response.results[i];

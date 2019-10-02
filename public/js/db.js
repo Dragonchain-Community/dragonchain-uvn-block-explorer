@@ -41,6 +41,18 @@ var db = {
 
 	},
 
+	getBlockById: async function (id) {
+		var instance = await db.getDB();
+		return instance.blocks.where("block_id").equals(Number(id)).first();
+	},
+
+	getBlocks: async function (limit) {
+		if (limit === undefined || limit === null) limit = 50;
+
+		var instance = await db.getDB();
+		return instance.blocks.orderBy("block_id").reverse().limit(limit).toArray();
+	},
+
 	destroy: async function () {
 		var instance = await db.getDB();
 

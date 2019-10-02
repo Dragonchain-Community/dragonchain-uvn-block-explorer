@@ -73,10 +73,13 @@
 		</div>		
 	</div>
 
-	<div class="row">
-		<div class="col-sm-12">
-			<p><b>Last Block:</b></p>
-			<pre class="bg-light border p-2"><code id="last-block"></code></pre>
+	<p><b>Block Browser:</b></p>
+	<div class="row">		
+		<div class="col-sm-2">
+			<div id="block-list" class="list-group overflow-auto" style="max-height: 498px;"></div>
+		</div>
+		<div class="col-sm-10">
+			<pre class="bg-light border p-2"><code id="current-block"></code></pre>
 		</div>
 	</div>
 </div>
@@ -163,7 +166,7 @@
 
 														tools.updateLastBlock();
 														tools.updateBlocksLastDay();
-														tools.updateChart();
+														tools.updateChart();														
 													}
 
 													if (node.last_block)
@@ -192,7 +195,14 @@
 							})
 					}
 				})
-		
+
+			$(document).on("click", ".btn-select-block", function () {
+				tools.updateBlockDisplayed($(this).attr("rel"))
+
+				$(".btn-select-block").removeClass("active")
+				$(this).addClass("active");
+			})
+
 			$("#logout")
 				.removeClass("d-none")
 				.click(function () {
