@@ -6,6 +6,7 @@ var node = {
 	block_count_day: null,
 	last_block: null,
 	last_block_id: null,
+	last_block_timestamp: null,
 	last_block_date: null,
 	time_at_last_block: null,
 	distinct_l1s: null,
@@ -54,29 +55,47 @@ var tools = {
 			})
 
 	},
-	getBlocksChunk: async function (start_block_id)
+	getBlocksChunk: async function (start_timestamp)
 	{
 		return $.ajax({
 			url: "/get-blocks",
 			method: "POST",
 			data: {
 				credentials_secure: window.localStorage.credentials_secure,
-				start_block_id: start_block_id
+				start_timestamp: start_timestamp
 			},				
 			dataType: "html"
 		})	
 	},
-	getBlocks: async function (start_block_id, max_block_id) {	
-		var chunk = JSON.parse(await tools.getBlocksChunk(start_block_id));
+	getBlocks: async function (start_timestamp, max_blocks, total_pulled) {	
+		
+		if (typeof total_pulled == "undefined")
+			total_pulled = 0;
 
-		if (chunk.blocks_remaining > 0 && Number(chunk.last_block_id) + 50 <= max_block_id)
-		{		
+		var chunk = JSON.parse(await tools.getBlocksChunk(start_timestamp));
+
+		if (chunk.blocks_remaining > 0 && (total_pulled + chunk.blocks.length + 50 <= max_blocks))
+		{					
 			//await sleep(500);
 			tools.setAppState("Retrieving new blocks (" + chunk.blocks_remaining + " left)");
-			return chunk.blocks.concat(await tools.getBlocks(chunk.last_block_id, max_block_id));
+			return chunk.blocks.concat(await tools.getBlocks(chunk.last_timestamp, max_blocks, total_pulled + chunk.blocks.length));
 		} else {			
 			return chunk.blocks;
 		}
+	},
+
+	getTransaction: function (txn_id)
+	{
+		return $.ajax({
+			url: "/get-transaction",
+			method: "POST",
+			data: {
+				credentials_secure: window.localStorage.credentials_secure,
+				txn_id: txn_id
+			},				
+			dataType: "html"
+		})	
+			
 	},
 
 	setTakaraPrice: function () {
@@ -103,10 +122,11 @@ var tools = {
 		{
 			node.last_block = block;
 			node.last_block_id = Number(block.header.block_id);
+			node.last_block_timestamp = Number(block.header.timestamp);
 			node.block_height = block.header.block_id;
 			node.last_block_date = moment(block.header.timestamp * 1000).format('lll') + " (" + moment(block.header.timestamp * 1000).fromNow() + ")";
 			node.time_at_last_block = block.header.current_ddss;		
-			tools.updateDistinctL1s();						
+			//tools.updateDistinctL1s();						
 			tools.updateBlockBrowserList();
 			tools.refreshUI();					
 		} else {
@@ -121,7 +141,7 @@ var tools = {
 						node.block_height = block.header.block_id;
 						node.last_block_date = moment(block.header.timestamp * 1000).format('lll') + " (" + moment(block.header.timestamp * 1000).fromNow() + ")";
 						node.time_at_last_block = block.header.current_ddss;					
-						tools.updateDistinctL1s();
+						//tools.updateDistinctL1s();
 						tools.refreshUI();					
 					} 
 				}).catch(function (err) {
@@ -140,7 +160,20 @@ var tools = {
 		db.getBlockById(block_id)
 			.then(function (block_record) {				
 				config.current_block_displayed = block_record.block;
-				$("#current-block").html(JSON.stringify(block_record.block, null, 2))
+				
+				block = block_record.block;
+
+				if (block.transactions)
+				{
+					for (var i =0; i < block.transactions.length; i++)
+					{
+						block.transactions[i] = JSON.parse(block.transactions[i]);
+
+						block.transactions[i].header.txn_id = "<a href='#' class='view-transaction' rel='" + block.transactions[i].header.txn_id + "'>" + block.transactions[i].header.txn_id + "</a>";											
+					}
+				}
+
+				$("#current-block").html(JSON.stringify(block, null, 2))
 				return block_record.block;
 			})
 		

@@ -88,9 +88,24 @@ const main = async() => {
 		try {			
 			const client = await dct.createClient(req.body.credentials_secure, config.salt);	
 
-			const blocks = await dct.getBlocks(client, req.body.start_block_id);
+			const blocks = await dct.getBlocks(client, req.body.start_timestamp);
 
 			res.send(JSON.stringify(blocks));		
+		} catch (e) {
+			console.log(e);
+			res.send(JSON.stringify({"error":e}));
+            return;
+		}
+	}));
+
+	app.post('/get-transaction', awaitHandlerFactory(async (req, res) => {
+
+		try {			
+			const client = await dct.createClient(req.body.credentials_secure, config.salt);	
+
+			const transaction = await dct.getTransaction(client, req.body.txn_id);
+
+			res.send(JSON.stringify(transaction));		
 		} catch (e) {
 			console.log(e);
 			res.send(JSON.stringify({"error":e}));

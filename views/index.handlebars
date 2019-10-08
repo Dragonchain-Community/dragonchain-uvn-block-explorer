@@ -46,18 +46,6 @@
 				<span id="dc-time-at-last-block"><span>
 			</div>
 		</div>
-
-		<div class="row">
-			<div class="col-sm-4">
-				<b>Distinct L1s Validated:</b><br/>
-				<span id="distinct-l1s"></span>
-			</div>
-			<div class="col-sm-4">
-				<b>Current Takara Price:</b><br/>
-				<span id="takara-price"></span>
-			</div>
-			
-		</div>
 	</div>
 
 	<div class="row">
@@ -94,6 +82,24 @@
 			<pre class="bg-light border p-2"><code id="current-block"></code></pre>
 		</div>
 	</div>
+</div>
+
+<div id="modal-transaction" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">		          
+      </div>
+      <div class="modal-footer">        
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -137,23 +143,22 @@
 
 						db.findLastBlock()
 							.then(function (result) {
-								var start_block_id = 0;
+								var start_timestamp = 0;
 
 								if (result)
 								{
 									node.last_block = result.block;
+									node.last_block_timestamp = Number(result.block.header.timestamp);
 									node.last_block_id = Number(result.block.header.block_id);
 								} else {
-									node.last_block_id = 0;
+									node.last_block_id = node.last_block_timestamp = 0;
 								}
 
 								var ping = function () {										
 									try {
 
-										var max_id = node.last_block_id + config.blocks_per_pull;
-
 										// Get new blocks //
-										tools.getBlocks(node.last_block_id, max_id)
+										tools.getBlocks(node.last_block_timestamp, config.blocks_per_pull)
 											.then(function (new_blocks) {
 												if (new_blocks && new_blocks.length > 0)											
 												{
@@ -215,6 +220,20 @@
 
 				$(".btn-select-block").removeClass("active")
 				$(this).addClass("active");
+			})
+
+			$(document).on("click", ".view-transaction", function () {
+				
+				tools.getTransaction($(this).attr("rel"))
+					.then(function (dataRaw) {			
+						data = JSON.parse(dataRaw);
+						$("#modal-transaction .modal-title").html("Transaction ID: " + data.header.txn_id)
+						$("#modal-transaction .modal-body").html("<pre class='bg-dark text-light border p-2'><code>" + JSON.stringify(data, null, 2) + "</code></pre>")
+						
+						$("#modal-transaction").modal();							
+					});
+
+				return false;
 			})
 
 			$("#logout")

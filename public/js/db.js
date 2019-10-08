@@ -32,7 +32,7 @@ var db = {
 	findLastBlock: async function () {		
 		var instance = await db.getDB();
 
-		return instance.blocks.orderBy('block_id').last();
+		return instance.blocks.orderBy('timestamp').last();
 	},
 
 	findBlocksByTimestampAboveOrEqual: async function (criteria) {
@@ -50,7 +50,7 @@ var db = {
 		if (limit === undefined || limit === null) limit = 50;
 
 		var instance = await db.getDB();
-		return instance.blocks.orderBy("block_id").reverse().limit(limit).toArray();
+		return instance.blocks.orderBy("timestamp").reverse().limit(limit).toArray();
 	},
 
 	destroy: async function () {

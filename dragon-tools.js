@@ -23,32 +23,40 @@ module.exports  = {
 
         return client;
     },
-    getBlocks: async function (client, start_block_id)
+    getBlocks: async function (client, start_timestamp)
     {
-        const start_timestamp = moment.utc().subtract(5, "months").startOf("month").format("X");
+        const earliest_timestamp = moment.utc().subtract(5, "months").startOf("month").format("X");
 
-        //const start_timestamp = 0;
+        if (start_timestamp < earliest_timestamp)
+            start_timestamp = earliest_timestamp;
         
-        const blocks_response = this.validateResponse(await client.queryBlocks({ redisearchQuery: `@block_id:[(${start_block_id} +inf] @timestamp:[${start_timestamp} +inf]`, limit: 500, sortBy: "block_id", sortAscending: true}));
+        const blocks_response = this.validateResponse(await client.queryBlocks({ redisearchQuery: `@timestamp:[(${start_timestamp} +inf]`, limit: 500, sortBy: "timestamp", sortAscending: true}));
 
         let blocks = [];
-        let last_block_id = start_block_id;
+        let last_timestamp = start_timestamp;
 
         if (blocks_response.response.results.length > 0)
         {               
             for (let i = 0; i < blocks_response.response.results.length; i++)
             {
                 element = blocks_response.response.results[i];
-                last_block_id = element.header.block_id;
+                last_timestamp = element.header.timestamp;
                 blocks.push(element);
             }
         }
 
         return {
             blocks: blocks, 
-            last_block_id: last_block_id,
+            last_timestamp: last_timestamp,
             blocks_remaining: (blocks_response.response.total - blocks.length)
         }
+    },
+
+    getTransaction: async function (client, txn_id)
+    {        
+        const blocks_response = this.validateResponse(await client.getTransaction({transactionId: txn_id}));
+
+        return blocks_response.response;
     },
     getStatus: async function (client)
     {
