@@ -2,7 +2,11 @@
 <p>
 	Enter your node credentials and a secure password below to log in.
 </p>
-<form id="frm_login">	
+<form id="frm_login">
+	<p>
+		<label for="public_id">Nickname for Node (Anything You Want)</label>
+		<input id="nickname" name="nickname" type="text" class="form-control">
+	</p>	
 	<p>
 		<label for="public_id">Public ID (NOT Chain ID)</label>
 		<input id="public_id" name="public_id" type="text" class="form-control">
@@ -45,6 +49,14 @@
 				dataType: "html"
 			})			
 				.done(function (data) {
+					if (typeof window.localStorage.credentialSets === "undefined")
+						window.localStorage.credentialSets = JSON.stringify([]);
+
+					var sets = JSON.parse(window.localStorage.credentialSets);
+
+					sets.push({nickname: $("#nickname").val(), credentials_secure: data});
+
+					window.localStorage.credentialSets = JSON.stringify(sets);
 					window.localStorage.credentials_secure = data;		
 					document.location.href="/";
 				})

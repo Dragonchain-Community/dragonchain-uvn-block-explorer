@@ -126,8 +126,29 @@
 
 		if (window.localStorage.credentials_secure)
 		{
-			tools.setTakaraPrice();
-			
+			// Display dropdown of credential sets //
+			var credentialSets = JSON.parse(window.localStorage.credentialSets);
+
+			$("#div-options-dropdown").prepend("<hr/>");
+
+			for (var i = credentialSets.length-1; i >= 0; i--)
+			{
+				if (credentialSets[i].credentials_secure != window.localStorage.credentials_secure)
+				{
+					$("#div-options-dropdown").prepend(
+						$("<a/>")							
+							.addClass("dropdown-item")							
+							.text(credentialSets[i].nickname)
+							.attr("rel", credentialSets[i].credentials_secure)
+							.attr("href", "#")
+							.click(function () {
+								window.localStorage.credentials_secure = $(this).attr("rel");
+								window.location.reload();
+							})
+					);
+				}	
+			}
+
 			tools.getStatus()
 				.then(function (data) {
 
@@ -141,7 +162,7 @@
 						node.node_level = dataObj.status.level;
 						node.dragonchain_version = dataObj.status.version;
 
-						db.findLastBlock()
+						db.findLastBlock(node.public_id)
 							.then(function (result) {
 								var start_timestamp = 0;
 

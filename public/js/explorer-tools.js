@@ -110,7 +110,7 @@ var tools = {
 		})
 	},
 	updateDistinctL1s: function () {
-		db.findBlocksByTimestampAboveOrEqual(0)
+		db.findBlocksByTimestampAboveOrEqual(node.public_id, 0)
 			.then(function (list) {    
 				const distinctL1s = [...new Set(list.map(x => x.block.validation.dc_id))]
 				node.distinct_l1s = distinctL1s.length;
@@ -131,7 +131,7 @@ var tools = {
 			tools.refreshUI();					
 		} else {
 			// Get the latest block and update node stats //
-			db.findLastBlock()
+			db.findLastBlock(node.public_id)
 				.then(function (result) {								
 					if (result)
 					{					
@@ -156,9 +156,9 @@ var tools = {
 				.then(function (block) {tools.updateBlockBrowserList()});			
 		}
 	},
-	updateBlockDisplayed: async function (block_id) {		
-		db.getBlockById(block_id)
-			.then(function (block_record) {				
+	updateBlockDisplayed: async function (block_id) {			
+		db.getBlockById(node.public_id, block_id)
+			.then(function (block_record) {								
 				config.current_block_displayed = block_record.block;
 				
 				block = block_record.block;
@@ -179,7 +179,7 @@ var tools = {
 		
 	},
 	updateBlockBrowserList: function () {
-		db.getBlocks(50)
+		db.getBlocks(node.public_id, 50)
 			.then(function (blocks) {								
 				$("#block-list").html("");
 
@@ -201,7 +201,7 @@ var tools = {
 		{
 			var start_timestamp = moment.utc().subtract(5, "months").startOf("month").format("X");
 			
-			db.findBlocksByTimestampAboveOrEqual(Number(start_timestamp))
+			db.findBlocksByTimestampAboveOrEqual(node.public_id, Number(start_timestamp))
 				.then(function (result) {
 					if (result && result.length > 0)
 						tools.drawBlocksPerMonth(tools.parseBlocksByMonth(result), "6 Months")
@@ -211,7 +211,7 @@ var tools = {
 		{
 			var start_timestamp = moment.utc().subtract(11, "weeks").startOf("week").format("X");
 			
-			db.findBlocksByTimestampAboveOrEqual(Number(start_timestamp))
+			db.findBlocksByTimestampAboveOrEqual(node.public_id, Number(start_timestamp))
 				.then(function (result) {
 					if (result && result.length > 0)
 						tools.drawBlocksPerWeek(tools.parseBlocksByWeek(result), "12 Weeks")
@@ -221,7 +221,7 @@ var tools = {
 		{		
 			var start_timestamp = moment.utc().subtract(13, "days").startOf("day").format("X");
 			
-			db.findBlocksByTimestampAboveOrEqual(Number(start_timestamp))
+			db.findBlocksByTimestampAboveOrEqual(node.public_id, Number(start_timestamp))
 				.then(function (result) {					
 					if (result && result.length > 0)
 						tools.drawBlocksPerDay(tools.parseBlocksByDay(result), "14 Days")
@@ -230,7 +230,7 @@ var tools = {
 		{		
 			var start_timestamp = moment.utc().subtract(23, "hours").startOf("hour").format("X");
 			
-			db.findBlocksByTimestampAboveOrEqual(Number(start_timestamp))
+			db.findBlocksByTimestampAboveOrEqual(node.public_id, Number(start_timestamp))
 				.then(function (result) {
 					if (result && result.length > 0)
 						tools.drawBlocksPerHour(tools.parseBlocksByHour(result), "24 Hours")
@@ -313,7 +313,7 @@ var tools = {
 		
 		var start_timestamp = moment.utc().subtract(23, "hours").startOf("hour").format("X");
 		
-		db.findBlocksByTimestampAboveOrEqual(Number(start_timestamp))
+		db.findBlocksByTimestampAboveOrEqual(node.public_id, Number(start_timestamp))
 			.then(function (result) {
 				if (result && result.length > 0)
 				{

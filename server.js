@@ -123,7 +123,7 @@ const main = async() => {
     });
 
 	// In production (optionally) use port 80 or, if SSL available, use port 443 //
-	const server = app.listen(3000, () => {
+	const server = app.listen(3000, '127.0.0.1', () => {
 		console.log(`Express running → PORT ${server.address().port}`);
 	});
 }

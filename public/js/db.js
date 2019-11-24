@@ -29,28 +29,28 @@ var db = {
 		return instance.blocks.bulkAdd(docs);
 	},
 
-	findLastBlock: async function () {		
+	findLastBlock: async function (public_id) {		
 		var instance = await db.getDB();
 
-		return instance.blocks.orderBy('timestamp').last();
+		return instance.blocks.orderBy('timestamp').filter(function (record) {return record.public_id == public_id}).last();
 	},
 
-	findBlocksByTimestampAboveOrEqual: async function (criteria) {
+	findBlocksByTimestampAboveOrEqual: async function (public_id, criteria) {
 		var instance = await db.getDB();
-		return instance.blocks.where("timestamp").aboveOrEqual(criteria).sortBy("timestamp");
+		return instance.blocks.where("timestamp").aboveOrEqual(criteria).filter(function (record) {return record.public_id == public_id}).sortBy("timestamp");
 
 	},
 
-	getBlockById: async function (id) {
+	getBlockById: async function (public_id, id) {		
 		var instance = await db.getDB();
-		return instance.blocks.where("block_id").equals(Number(id)).first();
+		return instance.blocks.where("block_id").equals(Number(id)).filter(function (record) {return record.public_id == public_id}).first();
 	},
 
-	getBlocks: async function (limit) {
+	getBlocks: async function (public_id, limit) {
 		if (limit === undefined || limit === null) limit = 50;
 
 		var instance = await db.getDB();
-		return instance.blocks.orderBy("timestamp").reverse().limit(limit).toArray();
+		return instance.blocks.orderBy("timestamp").reverse().filter(function (record) {return record.public_id == public_id}).limit(limit).toArray();
 	},
 
 	destroy: async function () {
