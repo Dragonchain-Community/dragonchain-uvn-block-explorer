@@ -21,6 +21,17 @@ var config = {
 	current_block_displayed: null
 }
 
+/* 
+TO ADD: 24 Hour block count across ALL nodes 
+
+db.getDB().then(async function (instance) {
+    var start = parseInt(new Date().getTime() / 1000) - (24*60*60)
+	var allblocks = await instance.blocks.where("timestamp").aboveOrEqual(start).toArray()
+	console.log(allblocks.length)
+});
+*/
+
+
 var tools = {	
 	refreshUI: function () {
 		$("#public-id").html(node.public_id);
