@@ -66,6 +66,52 @@ var tools = {
 			})
 
 	},
+	fetchBlockById: async function (block_id) {
+		return $.ajax({
+			url: "/get-block-by-id",
+			method: "POST",
+			data: {
+				credentials_secure: window.localStorage.credentials_secure,
+				id: block_id
+			},				
+			dataType: "html"
+		})	
+	},
+	getBlocksSequential: async function (start_block_id, max_blocks) {
+
+		var max_block_id = start_block_id + max_blocks;
+
+		var blocks = [];
+
+		var done = false;
+
+		while (!done)
+		{
+			try {
+				tools.setAppState("Retrieving block #" + start_block_id);
+				var response = JSON.parse(await tools.fetchBlockById(start_block_id));
+
+				if (typeof response.error != "undefined")
+				done = true;
+				else
+				{
+					blocks.push(response);
+
+					start_block_id++;
+
+					if (start_block_id == max_block_id)
+						done = true;
+				}
+				
+			} catch (exception)
+			{
+				done = true;
+			}
+		}
+
+		return blocks;
+
+	},
 	getBlocksChunk: async function (start_timestamp)
 	{
 		return $.ajax({
@@ -92,6 +138,46 @@ var tools = {
 			return chunk.blocks.concat(await tools.getBlocks(chunk.last_timestamp, max_blocks, total_pulled + chunk.blocks.length));
 		} else {			
 			return chunk.blocks;
+		}
+	},
+
+	processBlocks: function (new_blocks) {
+		if (new_blocks && new_blocks.length > 0)											
+		{
+			// Update the database //													
+			db.addBlocks(new_blocks)
+				.then(function () {																		
+					// Update last block and chart data //
+					tools.updateLastBlock(new_blocks[new_blocks.length-1]);
+					tools.updateBlocksLastDay();
+					tools.updateChart();
+
+					tools.setAppState("Last check: " + moment().format("LTS"));
+
+					tools.refreshUI();
+
+					setTimeout(ping, config.ping_delay);
+				});
+			
+		} else {													
+			if (!node.initialized)
+			{
+				node.last_update = moment.utc();								
+				node.initialized = true;
+
+				tools.updateLastBlock();
+				tools.updateBlocksLastDay();
+				tools.updateChart();														
+			}
+
+			if (node.last_block)
+				node.last_block_date = moment(node.last_block.header.timestamp * 1000).format('lll') + "  (" + moment(node.last_block.header.timestamp * 1000).fromNow() + ")";
+
+			tools.setAppState("Last check: " + moment().format("LTS"));
+
+			tools.refreshUI();
+
+			
 		}
 	},
 

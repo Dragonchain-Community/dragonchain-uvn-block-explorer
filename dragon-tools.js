@@ -23,6 +23,14 @@ module.exports  = {
 
         return client;
     },
+
+    getBlockById: async function (client, block_id)
+    { 
+        const block_response = this.validateResponse(await client.getBlock({blockId: block_id}));
+
+        return block_response.response;
+    },    
+
     getBlocks: async function (client, start_timestamp)
     {
         const earliest_timestamp = moment.utc().subtract(5, "months").startOf("month").format("X");

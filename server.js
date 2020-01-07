@@ -83,6 +83,21 @@ const main = async() => {
 		}
 	}));
 
+	app.post('/get-block-by-id', awaitHandlerFactory(async (req, res) => {
+
+		try {			
+			const client = await dct.createClient(req.body.credentials_secure, config.salt);	
+
+			const block = await dct.getBlockById(client, req.body.id);
+
+			res.send(JSON.stringify(block));		
+		} catch (e) {
+			console.log(e);
+			res.send(JSON.stringify({"error":e}));
+            return;
+		}
+	}));
+
 	app.post('/get-blocks', awaitHandlerFactory(async (req, res) => {
 
 		try {			
