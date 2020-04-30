@@ -10,7 +10,7 @@
     "express": "^4.17.1",
     "express-handlebars": "^3.1.0",
     "fs": "0.0.1-security",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "moment": "^2.24.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
