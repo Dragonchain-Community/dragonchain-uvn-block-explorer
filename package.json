@@ -14,7 +14,7 @@
     "moment": "^2.24.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
-    "underscore": "^1.9.1",
+    "underscore": "^1.12.1",
     "uuid": "^3.3.3"
   },
   "devDependencies": {
