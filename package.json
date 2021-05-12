@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "main": "server.js",
   "dependencies": {
-    "chart.js": "^2.8.0",
+    "chart.js": "^2.9.4",
     "crypto-js": "^3.1.9-1",
     "dexie": "^2.0.4",
     "dragonchain-sdk": "^4.0.0",
